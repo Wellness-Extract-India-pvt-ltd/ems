@@ -1,3 +1,8 @@
+/**
+ * Employee Controller
+ * Handles CRUD operations and business logic for employee resources.
+ */
+
 import { validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import crypto from 'crypto';

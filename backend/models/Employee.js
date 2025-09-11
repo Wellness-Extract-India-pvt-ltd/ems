@@ -114,7 +114,6 @@ const employeeSchema = new Schema({
   
 }, { timestamps: true });
 
-employeeSchema.index({ "employment.employeeId": 1 })
 employeeSchema.virtual('fullName').get(function () {
   return `${this.personal.firstName} ${this.personal.middleName || ''} ${this.personal.lastName}`.trim();
 });

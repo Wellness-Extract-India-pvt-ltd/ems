@@ -1,0 +1,18 @@
+[2025-08-28 16:24:11] ERROR: MSAL authentication failed {
+  "error": {
+    "errorLabelSet": {},
+    "errorResponse": {
+      "ok": 0,
+      "errmsg": "you are over your space quota, using 512 MB of 512 MB",
+      "code": 8000,
+      "codeName": "AtlasError"
+    },
+    "ok": 0,
+    "code": 8000,
+    "codeName": "AtlasError"
+  }
+}
+[2025-08-28 16:37:43] ERROR: Auth code URL generation failed {
+  "error": {},
+  "identifier": "WE_IN030"
+}

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import Logo from './Logo';
 import InputField from './InputField';
 import Button from './Button';
@@ -15,9 +17,29 @@ import microsoftLogo from '../assets/Microsoft_logo.svg';
  *   query‑param `identifier`. No client‑side branching on email vs code.
  */
 const LoginForm = () => {
+  const location = useLocation();
+  
   // Holds either employee‑code *or* email depending on the active mode
   const [identifier, setIdentifier] = useState('');
   const [useEmail, setUseEmail] = useState(false); // false ⇒ employee‑code mode
+
+  // Handle error messages from URL params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const error = params.get('error');
+    
+    if (error) {
+      const errorMessages = {
+        'missing_token': 'Authentication failed. Please try logging in again.',
+        'invalid_token': 'Your session has expired. Please log in again.',
+        'auth_failed': 'Authentication failed. Please check your credentials.',
+        'not_found': 'User not found. Please contact your administrator.',
+        'invalid_request': 'Invalid request. Please try again.'
+      };
+      
+      toast.error(errorMessages[error] || 'An error occurred during login.');
+    }
+  }, [location]);
 
   const toggleMode = () => {
     setUseEmail((prev) => !prev);
@@ -34,7 +56,7 @@ const LoginForm = () => {
 
     // Send whichever identifier the user entered. The backend decides
     // whether it is email or code.
-    window.location.href = `http://localhost:5000/auth/login?identifier=${encodeURIComponent(
+    window.location.href = `http://localhost:5000/api/v1/auth/login?identifier=${encodeURIComponent(
       identifier.trim()
     )}`;
   };

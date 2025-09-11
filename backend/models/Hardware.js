@@ -78,7 +78,6 @@ const hardwareSchema = new mongoose.Schema({
 
 hardwareSchema.index({ type: 1 });
 hardwareSchema.index({ status: 1 });
-hardwareSchema.index({ serialNumber: 1 }, { unique: true, sparse: true });
 hardwareSchema.index({ assignedTo: 1 });
 
 export default mongoose.model("Hardware", hardwareSchema);

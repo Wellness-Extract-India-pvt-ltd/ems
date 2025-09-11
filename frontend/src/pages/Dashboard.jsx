@@ -1,30 +1,19 @@
-import React, { useEffect } from "react";
-import { useSelector } from 'react-redux'
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import {useAuth} from '../auth/context/AuthProvider';
 
 import WelcomeBanner from "../components/Dashboard/WelcomeBanner";
 import SummaryCards from "../components/Dashboard/SummaryCards";
 import RecentActivity from "../components/Dashboard/RecentActivity";
 
 const Dashboard = () => {
-    // const navigate = useNavigate();
+    
+    const { user, loading } = useAuth();
 
-    // useEffect(() => {
-    //     const urlParams = new URLSearchParams(window.location.search);
-    //     const token = urlParams.get("token");
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
-    //     if (token) {
-    //         localStorage.setItem("auth_token", token);
-    //         window.history.replaceState(null, "", "/dashboard");
-    //     } else {
-    //         const storedToken = localStorage.getItem("auth_token");
-    //         if (!storedToken) {
-    //             navigate("/login");
-    //         }
-    //     }
-    // }, [navigate]);
-
-    const userName = useSelector((state) => state.user?.name || 'Guest')
+    const userName = user?.email?.split('@')[0] || user?.email || 'Guest';
     
     return (
         <div className="space-y-6 px-4 py-6">

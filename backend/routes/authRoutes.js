@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { query, validationResult } from 'express-validator';
 
-import { loginHandler, redirectHandler } from '../controllers/authController.js';
+import { login, redirectHandler } from '../controllers/authController.js';
 
 const router = express.Router();
 router.use(helmet());
@@ -16,7 +16,7 @@ const authLimiter = rateLimit({
 
 router.get('/login', authLimiter, [
     query('identifier').trim().notEmpty().withMessage('Identifier is required')
-], loginHandler);
+], login);
 
 router.get('/redirect', redirectHandler);
 

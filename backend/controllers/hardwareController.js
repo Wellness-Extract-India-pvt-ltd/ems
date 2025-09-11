@@ -1,155 +1,103 @@
+/**
+ * Hardware Controller
+ * Handles CRUD operations and business logic for hardware asset resources.
+ */
+
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 import logger from '../utils/logger.js';
-import hardwareModel from '../models/Hardware.js';
+import Hardware from '../models/Hardware.js';
 
-// POST /add
-export async function addHardware(req, res) {
+/**
+ * Get all hardware assets.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function listHardware(req, res, next) {
+  try {
+    // Retrieve all hardware assets from the database
+    const hardware = await Hardware.find();
+    res.json(hardware);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Get a single hardware asset by ID.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function getHardwareById(req, res, next) {
+  try {
+    // Find hardware asset by ID
+    const hardware = await Hardware.findById(req.params.id);
+    if (!hardware) {
+      return res.status(404).json({ error: 'Hardware not found' });
+    }
+    res.json(hardware);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Create a new hardware asset.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function addHardware(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    const newHardware = new hardwareModel(req.body);
-    await newHardware.save();
-
-    logger.info('Hardware added', {
-      hardwareId: newHardware._id,
-      type: newHardware.type,
-      status: newHardware.status
-    });
-
-    res.status(201).json({
-      message: 'Hardware added successfully',
-      hardware: newHardware
-    });
-  } catch (error) {
-    logger.error('Hardware creation failed', {
-      error: error.message,
-      payload: req.body
-    });
-    res.status(400).json({
-      message: 'Error adding hardware',
-      error: error.message
-    });
+    // Create and save a new hardware asset
+    const hardware = new Hardware(req.body);
+    await hardware.save();
+    res.status(201).json(hardware);
+  } catch (err) {
+    next(err);
   }
 }
 
-// GET /all
-export async function listHardware(req, res) {
+/**
+ * Update an existing hardware asset by ID.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function updateHardware(req, res, next) {
   try {
-    const { status, type, search, page = 1, limit = 10 } = req.query;
-    const query = {};
-
-    if (status) query.status = status;
-    if (type) query.type = type;
-    if (search) {
-      query.$or = [
-        { name: new RegExp(search, 'i') },
-        { brand: new RegExp(search, 'i') },
-        { model: new RegExp(search, 'i') },
-        { serialNumber: new RegExp(search, 'i') }
-      ];
+    // Find hardware asset by ID and update
+    const hardware = await Hardware.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!hardware) {
+      return res.status(404).json({ error: 'Hardware not found' });
     }
-
-    const hardwareItems = await hardwareModel.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .lean();
-
-    const count = await hardwareModel.countDocuments(query);
-
-    res.status(200).json({
-      data: hardwareItems,
-      total: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: Number(page)
-    });
-  } catch (error) {
-    logger.error('Hardware list error', error);
-    res.status(500).json({
-      message: 'Error fetching hardware',
-      error: error.message
-    });
+    res.json(hardware);
+  } catch (err) {
+    next(err);
   }
 }
 
-// GET /:_id
-export async function getHardwareById(req, res) {
+/**
+ * Delete a hardware asset by ID.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function deleteHardware(req, res, next) {
   try {
-    const hardwareItem = await hardwareModel.findById(req.params._id).lean();
-    if (!hardwareItem) {
-      return res.status(404).json({ message: 'Hardware not found' });
+    // Find hardware asset by ID and delete
+    const hardware = await Hardware.findByIdAndDelete(req.params.id);
+    if (!hardware) {
+      return res.status(404).json({ error: 'Hardware not found' });
     }
-    res.status(200).json(hardwareItem);
-  } catch (error) {
-    logger.error('Hardware fetch error', {
-      hardwareId: req.params._id,
-      error: error.message
-    });
-    res.status(500).json({
-      message: 'Error fetching hardware',
-      error: error.message
-    });
-  }
-}
-
-// PUT /update/:_id
-export async function updateHardware(req, res) {
-  const session = await mongoose.startSession();
-  try {
-    session.startTransaction();
-
-    const updatedHardware = await hardwareModel.findByIdAndUpdate(
-      req.params._id,
-      req.body,
-      { new: true, runValidators: true, session }
-    );
-
-    if (!updatedHardware) {
-      await session.abortTransaction();
-      return res.status(404).json({ message: 'Hardware not found' });
-    }
-
-    await session.commitTransaction();
-    logger.info('Hardware updated', { hardwareId: req.params._id });
-    res.status(200).json({
-      message: 'Hardware updated successfully',
-      hardware: updatedHardware
-    });
-  } catch (error) {
-    await session.abortTransaction();
-    logger.error('Hardware update failed', {
-      hardwareId: req.params._id,
-      error: error.message
-    });
-    res.status(400).json({
-      message: 'Error updating hardware',
-      error: error.message
-    });
-  } finally {
-    session.endSession();
-  }
-}
-
-// DELETE /delete/:id
-export async function deleteHardware(req, res) {
-  try {
-    const deletedHardware = await hardwareModel.findByIdAndDelete(req.params._id);
-    if (!deletedHardware) {
-      return res.status(404).json({ message: 'Hardware not found' });
-    }
-
-    logger.info('Hardware deleted', { hardwareId: req.params._id });
-    res.status(200).json({ message: 'Hardware deleted successfully' });
-  } catch (error) {
-    logger.error('Hardware deletion failed', {
-      hardwareId: req.params._id,
-      error: error.message
-    });
-    res.status(500).json({
-      message: 'Error deleting hardware',
-      error: error.message
-    });
+    res.json({ message: 'Hardware deleted successfully' });
+  } catch (err) {
+    next(err);
   }
 }
