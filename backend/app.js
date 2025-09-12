@@ -27,6 +27,15 @@ app.use(express.urlencoded({ extended: true }));
 // Parse cookies from the HTTP Request
 app.use(cookieParser());
 
+// Health check endpoint
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // Add security-related HTTP headers
 app.use(helmet());
 

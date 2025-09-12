@@ -7,7 +7,8 @@ import {
   listSoftware,
   getSoftwareById,
   updateSoftware,
-  deleteSoftware
+  deleteSoftware,
+  getSoftwareByEmployee
 } from '../controllers/softwareController.js';
 
 const router = express.Router();
@@ -33,10 +34,13 @@ const softwareValidation = [
 // POST /add - create software (admins only)
 router.post('/add', createLimiter, requiresRole('admin'), softwareValidation, addSoftware);
 
-// GET /all - list software (all authenticated users)
+// GET /all - list software (role-based access)
 router.get('/all', listSoftware);
 
-// GET /:id - get software by ID (all authenticated)
+// GET /employee/:employeeId - get software assigned to specific employee (role-based access)
+router.get('/employee/:employeeId', getSoftwareByEmployee);
+
+// GET /:id - get software by ID (role-based access)
 router.get('/:_id',
   param('_id').isMongoId().withMessage('Invalid software ID'),
   getSoftwareById

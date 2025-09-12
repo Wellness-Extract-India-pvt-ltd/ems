@@ -1,6 +1,7 @@
 import React from "react";
 import { Bell, ArrowLeft, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import LogoutButton from "../LogoutButton";
 
 const Header = ({ title="MyWellness", showBack=false, className="", onMenuClick = () => {} }) => {
     const navigate = useNavigate();
@@ -44,20 +45,7 @@ const Header = ({ title="MyWellness", showBack=false, className="", onMenuClick 
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold">3</span>
                 </button>
 
-                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold text-white">
-                    SK
-                </div>
-
-                <div className="text-right">
-                    <div className="text-sm font-medium text-gray-800">Sawan Khanna</div>
-                    <div className="text-xs text-gray-500">Admin</div>
-                </div>
-
-                <div className="cursor-pointer">
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
+                <LogoutButton />
             </div>
         </header>
     )

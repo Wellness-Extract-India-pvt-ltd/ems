@@ -7,7 +7,8 @@ import {
   listLicenses,
   getLicenseById,
   updateLicense,
-  deleteLicense
+  deleteLicense,
+  getLicensesByEmployee
 } from '../controllers/licenseController.js';
 
 const router = express.Router();
@@ -29,10 +30,13 @@ const licenseValidation = [
 
 router.post('/add', createLimiter, requiresRole('admin'), licenseValidation, addLicense);
 
-// GET /all (all roles can view)
+// GET /all (role-based access)
 router.get('/all', listLicenses);
 
-// GET /:id (all roles can view)
+// GET /employee/:employeeId - get licenses assigned to specific employee (role-based access)
+router.get('/employee/:employeeId', getLicensesByEmployee);
+
+// GET /:id (role-based access)
 router.get('/:_id', param('_id').isMongoId().withMessage('Invalid license ID'), getLicenseById);
 
 // PUT /update/:id (admin only)

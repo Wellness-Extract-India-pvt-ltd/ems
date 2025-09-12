@@ -64,13 +64,34 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Clear tokens and user info on logout
-  const logout = useCallback(() => {
-    setUser(null);
-    setToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-  }, []);
+  const logout = useCallback(async () => {
+    try {
+      // Call backend logout endpoint if we have a token
+      if (token) {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+        const response = await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          console.warn('Backend logout failed, but continuing with local logout');
+        }
+      }
+    } catch (error) {
+      console.warn('Error calling logout endpoint:', error);
+    } finally {
+      // Always clear local state regardless of backend response
+      setUser(null);
+      setToken(null);
+      setRefreshToken(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+    }
+  }, [token]);
 
   const isAuthenticated = !!user;
 

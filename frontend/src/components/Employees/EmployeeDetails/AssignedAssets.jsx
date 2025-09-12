@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AssignedAssetRow from './AssignedAssetRow';
 import AssignAssetButton from './AssignAssetButton';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { getHardwareByEmployee } from '../../../store/slices/assetSlice';
 
 const AssignedAssets = () => {
-    const assets = useSelector((state) => state.assets.assets);
+    const { id } = useParams();
+    const dispatch = useDispatch();
+    const assets = useSelector((state) => state.assets.employeeAssets);
+    const status = useSelector((state) => state.assets.status.fetchByEmployee);
+
+    useEffect(() => {
+        if (id) {
+            dispatch(getHardwareByEmployee(id));
+        }
+    }, [dispatch, id]);
+
+    if (status === 'loading') {
+        return (
+            <div className='bg-white p-6 rounded shadow'>
+                <div className='flex items-center justify-between mb-4'>
+                    <h2 className="text-lg font-semibold">Assigned Assets</h2>
+                </div>
+                <p className='text-sm text-gray-500'>Loading assets...</p>
+            </div>
+        );
+    }
 
     return (
         <div className='bg-white p-6 rounded shadow'>

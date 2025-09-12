@@ -3,7 +3,8 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { query, validationResult } from 'express-validator';
 
-import { login, redirectHandler } from '../controllers/authController.js';
+import { login, redirectHandler, logout, refreshToken } from '../controllers/authController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 router.use(helmet());
@@ -19,5 +20,11 @@ router.get('/login', authLimiter, [
 ], login);
 
 router.get('/redirect', redirectHandler);
+
+// Logout route - requires authentication
+router.post('/logout', authMiddleware, logout);
+
+// Refresh token route
+router.post('/refresh', refreshToken);
 
 export default router;

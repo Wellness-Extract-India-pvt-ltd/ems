@@ -7,7 +7,8 @@ import {
   listHardware,
   getHardwareById,
   updateHardware,
-  deleteHardware
+  deleteHardware,
+  getHardwareByEmployee
 } from '../controllers/hardwareController.js';
 
 const router = express.Router();
@@ -38,10 +39,13 @@ const hardwareValidation = [
 // POST /add - Create hardware (admin only)
 router.post('/add', createLimiter, requiresRole('admin'), hardwareValidation, addHardware);
 
-// GET /all - List hardware (all authenticated users)
+// GET /all - List hardware (role-based access)
 router.get('/all', listHardware);
 
-// GET /:id - Get single hardware by id
+// GET /employee/:employeeId - Get hardware assigned to specific employee (role-based access)
+router.get('/employee/:employeeId', getHardwareByEmployee);
+
+// GET /:id - Get single hardware by id (role-based access)
 router.get('/:_id', getHardwareById);
 
 // PUT /update/:id - Update hardware (admin only)

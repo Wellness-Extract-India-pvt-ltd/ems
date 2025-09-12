@@ -10,22 +10,38 @@ import {
     FileText,
     Settings,
     Puzzle,
-    X
+    X,
+    LogOut
 } from "lucide-react";
 import classNames from "classnames";
+import { useAuth } from "../../auth/context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import RoleBasedAccess from "../RoleBasedAccess";
 
 const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
-    { name: 'Employees', path: '/employees', icon: <Users size={18} /> },
+    { name: 'Employees', path: '/employees', icon: <Users size={18} />, roles: ['admin', 'manager'] },
     { name: 'Assets', path: '/assets', icon: <Box size={18} /> },
     { name: 'Software', path: '/software', icon: <Monitor size={18} /> },
     { name: 'Licenses', path: '/licenses', icon: <BadgeCheck size={18} /> },
     { name: 'Tickets', path: '/tickets', icon: <LifeBuoy size={18} /> },
-    { name: 'Audit Logs', path: '/audit-logs', icon: <FileText size={18} /> },
-    { name: 'Integrations', path: '/integrations', icon: <Puzzle size={18} /> }
+    { name: 'Audit Logs', path: '/audit-logs', icon: <FileText size={18} />, roles: ['admin'] },
+    { name: 'Integrations', path: '/integrations', icon: <Puzzle size={18} />, roles: ['admin'] }
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
     return (
         <>
             <div
@@ -59,23 +75,29 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <nav>
                     <ul className="space-y-1">
                         {menuItems.map((item) => (
-                            <li key={item.name}>
-                                <NavLink
-                                    to={item.path}
-                                    className={({ isActive }) => 
-                                        `flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
-                                    }`}>
-                                    {item.icon}
-                                    {item.name}
-                                </NavLink>
-                            </li>
+                            <RoleBasedAccess 
+                                key={item.name}
+                                allowedRoles={item.roles || []}
+                                fallback={null}
+                            >
+                                <li>
+                                    <NavLink
+                                        to={item.path}
+                                        className={({ isActive }) => 
+                                            `flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                        }`}>
+                                        {item.icon}
+                                        {item.name}
+                                    </NavLink>
+                                </li>
+                            </RoleBasedAccess>
                         ))}
                     </ul>
                 </nav>
 
                 <div className="border-t my-4"></div>
                 <nav>
-                    <ul>
+                    <ul className="space-y-1">
                         <li>
                             <NavLink
                                 to="/settings"
@@ -86,6 +108,15 @@ const Sidebar = ({ isOpen, onClose }) => {
                                 <Settings size={18} />
                                 Settings
                             </NavLink>
+                        </li>
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors text-red-600 hover:bg-red-50"
+                            >
+                                <LogOut size={18} />
+                                Logout
+                            </button>
                         </li>
                     </ul>
                 </nav>

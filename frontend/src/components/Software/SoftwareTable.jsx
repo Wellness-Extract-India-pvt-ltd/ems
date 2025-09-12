@@ -18,9 +18,28 @@ const SoftwareTable = () => {
           </tr>
         </thead>
         <tbody>
+<<<<<<< Updated upstream
           {softwareList.map(software => (
             <SoftwareRow key={software.id} software={software} />
           ))}
+=======
+          {softwareList.length === 0 ? (
+            <tr>
+              <td colSpan="8" className="text-center py-8 text-gray-500">
+                No software found. Add your first software application.
+              </td>
+            </tr>
+          ) : (
+            softwareList.map(software => (
+              <SoftwareRow 
+                key={software.id} 
+                software={software} 
+                onEdit={onEdit}
+                onView={onView}
+              />
+            ))
+          )}
+>>>>>>> Stashed changes
         </tbody>
       </table>
     </div>

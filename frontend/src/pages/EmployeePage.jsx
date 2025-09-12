@@ -10,8 +10,11 @@ import SearchBar from '../components/Employees/SearchBar'
 import EmployeeTable from '../components/Employees/EmployeeTable'
 import Pagination from '../components/Employees/Pagination'
 import BulkUploadButton from '../components/Employees/BulkUploadButton'
+import RoleBasedAccess from '../components/RoleBasedAccess'
+import { useAuth } from '../auth/context/AuthProvider'
 
 const EmployeePage = () => {
+    const { user } = useAuth()
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
@@ -79,7 +82,9 @@ const EmployeePage = () => {
                 onAddEmployee={handleAddEmployee}
             />
 
-            <BulkUploadButton onUpload={handleBulkUpload} />
+            <RoleBasedAccess allowedRoles={['admin']}>
+                <BulkUploadButton onUpload={handleBulkUpload} />
+            </RoleBasedAccess>
             </div>
 
             {loading ? (

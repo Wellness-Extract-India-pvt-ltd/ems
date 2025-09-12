@@ -160,9 +160,31 @@ export async function redirectHandler(req, res) {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export const logout = (req, res) => {
-  // Invalidate refresh token on client side (stateless JWT)
-  res.status(200).json({ message: 'Logged out successfully' });
+export const logout = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    
+    if (userId) {
+      // Clear refresh token from database
+      await UserRoleMap.update(
+        { refresh_token: null },
+        { where: { id: userId } }
+      );
+      
+      logger.info('User logged out successfully', { userId });
+    }
+    
+    res.status(200).json({ 
+      message: 'Logged out successfully',
+      success: true 
+    });
+  } catch (error) {
+    logger.error('Logout error', { error: error.message, userId: req.user?.id });
+    res.status(500).json({ 
+      message: 'Logout failed', 
+      success: false 
+    });
+  }
 };
 
 /**

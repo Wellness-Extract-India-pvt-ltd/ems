@@ -18,11 +18,12 @@ const statusColors = {
 
 const AssignedAssetRow = ({ asset }) => {
   const {
+    name = 'Unknown Asset',
     model = 'Unknown Model',
     type = 'Unknown',
-    serialNumber = 'N/A',
-    status = 'Inactive',
-    assignedTo = '—',
+    serial_number = 'N/A',
+    status = 'inactive',
+    assignedEmployee = null,
   } = asset;
 
   const Icon = typeIcons[type] || Laptop;
@@ -31,10 +32,10 @@ const AssignedAssetRow = ({ asset }) => {
     <tr className="border-t text-sm text-gray-800 hover:bg-gray-50">
       <td className='px-4 py-3 flex items-center gap-2'>
         <Icon size={16} className='text-gray-500' />
-        {model}
+        {name}
       </td>
       <td className="px-4 py-3">{type}</td>
-      <td className="px-4 py-3">{serialNumber}</td>
+      <td className="px-4 py-3">{serial_number}</td>
       <td className="px-4 py-3">
         <span 
           className={`px-2 py-1 text-xs font-medium rounded ${
@@ -42,7 +43,9 @@ const AssignedAssetRow = ({ asset }) => {
           {status}
         </span>
       </td>
-      <td className="px-4 py-3">{assignedTo}</td>
+      <td className="px-4 py-3">
+        {assignedEmployee ? `${assignedEmployee.first_name} ${assignedEmployee.last_name}` : '—'}
+      </td>
       <td className='px-4 py-3 flex gap-4 text-sm'>
         <button className='text-blue-600 hover:underline'>View</button>
         <button className='text-red-600 hover:underline'>Return</button>

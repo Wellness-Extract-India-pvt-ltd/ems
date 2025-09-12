@@ -6,11 +6,6 @@
     "auditLog": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\.dc6310a5de10fe75f5b1b2e024dfd1c0851103be-audit.json",
     "files": [
         {
-            "date": 1756377114794,
-            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\exceptions-2025-08-28.log",
-            "hash": "b3572c1b9d50a160442c48064cc84456b0646a2817e68cb1d26afbee15e89e89"
-        },
-        {
             "date": 1757306696683,
             "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\exceptions-2025-09-08.log",
             "hash": "a301d9af404ab6983490b7661598df351a3f69299d654fd31753e443795b63d1"
@@ -19,6 +14,11 @@
             "date": 1757579825321,
             "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\exceptions-2025-09-11.log",
             "hash": "eb869a9ffd434d019f4a0a89f861a264877611af6fe2197e0c1126ffdf0aa3c8"
+        },
+        {
+            "date": 1757654792262,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\exceptions-2025-09-12.log",
+            "hash": "287cff0d2a07183d18ad6d260c2faad21c34b18110ec06651ebebc04a988c26f"
         }
     ],
     "hashType": "sha256"
