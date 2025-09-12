@@ -1,40 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createHardware, updateHardware } from '../../store/slices/assetSlice';
+import { createSoftware, updateSoftware } from '../../store/slices/softwareSlice';
 import { X } from 'lucide-react';
 
-const AssetForm = ({ asset, onClose, onSuccess }) => {
+const SoftwareForm = ({ software, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const { status } = useSelector(state => state.assets);
+  const { status } = useSelector(state => state.software);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'laptop',
-    brand: '',
-    model: '',
-    serialNumber: '',
+    version: '',
+    vendor: '',
+    licenseType: 'commercial',
     purchaseDate: '',
-    warrantyExpiryDate: '',
-    status: 'available',
+    expiryDate: '',
     assignedTo: '',
-    notes: ''
+    description: ''
   });
 
   useEffect(() => {
-    if (asset) {
+    if (software) {
       setFormData({
-        name: asset.name || '',
-        type: asset.type || 'laptop',
-        brand: asset.brand || '',
-        model: asset.model || '',
-        serialNumber: asset.serialNumber || '',
-        purchaseDate: asset.purchaseDate ? asset.purchaseDate.split('T')[0] : '',
-        warrantyExpiryDate: asset.warrantyExpiryDate ? asset.warrantyExpiryDate.split('T')[0] : '',
-        status: asset.status || 'available',
-        assignedTo: asset.assignedTo?._id || '',
-        notes: asset.notes || ''
+        name: software.name || '',
+        version: software.version || '',
+        vendor: software.vendor || '',
+        licenseType: software.licenseType || 'commercial',
+        purchaseDate: software.purchaseDate ? software.purchaseDate.split('T')[0] : '',
+        expiryDate: software.expiryDate ? software.expiryDate.split('T')[0] : '',
+        assignedTo: software.assignedTo?._id || '',
+        description: software.description || ''
       });
     }
-  }, [asset]);
+  }, [software]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,14 +41,14 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
         assignedTo: formData.assignedTo || null
       };
 
-      if (asset) {
-        await dispatch(updateHardware({ id: asset._id, hardwareData: submitData }));
+      if (software) {
+        await dispatch(updateSoftware({ id: software._id, softwareData: submitData }));
       } else {
-        await dispatch(createHardware(submitData));
+        await dispatch(createSoftware(submitData));
       }
       onSuccess();
     } catch (error) {
-      console.error('Error saving hardware:', error);
+      console.error('Error saving software:', error);
     }
   };
 
@@ -71,7 +67,7 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-semibold">
-            {asset ? 'Edit Hardware Asset' : 'Add New Hardware Asset'}
+            {software ? 'Edit Software' : 'Add New Software'}
           </h2>
           <button
             onClick={onClose}
@@ -85,7 +81,7 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Asset Name *
+                Software Name *
               </label>
               <input
                 type="text"
@@ -95,96 +91,64 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., MacBook Pro 16-inch"
+                placeholder="e.g., Microsoft Office"
               />
             </div>
 
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                Asset Type *
+              <label htmlFor="version" className="block text-sm font-medium text-gray-700 mb-1">
+                Version *
+              </label>
+              <input
+                type="text"
+                id="version"
+                name="version"
+                value={formData.version}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., 2021, 1.0.0"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="vendor" className="block text-sm font-medium text-gray-700 mb-1">
+                Vendor *
+              </label>
+              <input
+                type="text"
+                id="vendor"
+                name="vendor"
+                value={formData.vendor}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., Microsoft, Adobe"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="licenseType" className="block text-sm font-medium text-gray-700 mb-1">
+                License Type *
               </label>
               <select
-                id="type"
-                name="type"
-                value={formData.type}
+                id="licenseType"
+                name="licenseType"
+                value={formData.licenseType}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="laptop">Laptop</option>
-                <option value="desktop">Desktop</option>
-                <option value="server">Server</option>
-                <option value="network device">Network Device</option>
-                <option value="peripheral">Peripheral</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
-                Brand
-              </label>
-              <input
-                type="text"
-                id="brand"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Apple, Dell, HP"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
-                Model
-              </label>
-              <input
-                type="text"
-                id="model"
-                name="model"
-                value={formData.model}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., MacBook Pro 16-inch"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                Serial Number
-              </label>
-              <input
-                type="text"
-                id="serialNumber"
-                name="serialNumber"
-                value={formData.serialNumber}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter serial number"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="available">Available</option>
-                <option value="in use">In Use</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="retired">Retired</option>
+                <option value="commercial">Commercial</option>
+                <option value="open-source">Open Source</option>
+                <option value="freeware">Freeware</option>
+                <option value="shareware">Shareware</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="purchaseDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Purchase Date
+                Purchase Date *
               </label>
               <input
                 type="date"
@@ -192,19 +156,20 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
                 name="purchaseDate"
                 value={formData.purchaseDate}
                 onChange={handleChange}
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label htmlFor="warrantyExpiryDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Warranty Expiry Date
+              <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Expiry Date
               </label>
               <input
                 type="date"
-                id="warrantyExpiryDate"
-                name="warrantyExpiryDate"
-                value={formData.warrantyExpiryDate}
+                id="expiryDate"
+                name="expiryDate"
+                value={formData.expiryDate}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -212,17 +177,17 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-              Notes
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              Description
             </label>
             <textarea
-              id="notes"
-              name="notes"
-              value={formData.notes}
+              id="description"
+              name="description"
+              value={formData.description}
               onChange={handleChange}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Additional notes about this asset"
+              placeholder="Describe the software and its purpose"
             />
           </div>
 
@@ -239,7 +204,7 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
               disabled={isLoading}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {isLoading ? 'Saving...' : (asset ? 'Update Asset' : 'Add Asset')}
+              {isLoading ? 'Saving...' : (software ? 'Update Software' : 'Add Software')}
             </button>
           </div>
         </form>
@@ -248,4 +213,4 @@ const AssetForm = ({ asset, onClose, onSuccess }) => {
   );
 };
 
-export default AssetForm;
+export default SoftwareForm;

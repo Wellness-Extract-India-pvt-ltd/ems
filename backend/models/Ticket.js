@@ -1,120 +1,158 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
 const STATUSES = ['open', 'in-progress', 'resolved', 'closed', 'rejected'];
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
-const attachmentSchema = new mongoose.Schema({
-  path: { type: String, required: true },
-  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
-  uploadedAt: { type: Date, default: Date.now }
-}, { _id: false });
-
-const commentSchema = new mongoose.Schema({
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
-  message: { type: String, required: true, trim: true },
-  createdAt: { type: Date, default: Date.now }
-}, { _id: false });
-
-const eventSchema = new mongoose.Schema({
-  field: { type: String, enum: ['status', 'assignedTo', 'priority'], required: true },
-  from: { type: String },
-  to: { type: String },
-  changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
-  changedAt: { type: Date, default: Date.now }
-}, { _id: false });
-
-const ticketSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    description: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    status: {
-        type: String,
-        required: true,
-        enum: STATUSES,
-        default: 'open'
-    },
-    priority: {
-        type: String,
-        required: true,
-        enum: PRIORITIES,
-        default: 'medium'
-    },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Employee',
-        required: true
-    },
-    assignedTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Employee',
+const Ticket = sequelize.define('Ticket', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
     validate: {
-      validator: async function (value) {
-        if (!value) return true;
-        if (value.equals(this.createdBy)) return false;
-        return await mongoose.model('Employee').exists({ _id: value });
-      },
-      message: 'Employee does not exist or is the ticket creator'
+      notEmpty: true,
+      len: [1, 200]
     }
   },
-    dueDate: {
-    type: Date
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
   },
-    resolvedAt: {
-      type: Date,
+  status: {
+    type: DataTypes.ENUM(...STATUSES),
+    allowNull: false,
+    defaultValue: 'open'
+  },
+  priority: {
+    type: DataTypes.ENUM(...PRIORITIES),
+    allowNull: false,
+    defaultValue: 'medium'
+  },
+  created_by: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
+  },
+  assigned_to: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
+  },
+  due_date: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  resolved_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  closed_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  rejection_reason: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  is_escalated: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  category: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 100]
+    }
+  },
+  tags: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: []
+  }
+}, {
+  tableName: 'tickets',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      fields: ['status']
     },
-    closedAt: {          // Added to record when ticket is closed
-    type: Date
-  },
-      attachments: [attachmentSchema],
-      comments: [commentSchema],
-      events: [eventSchema],
-  rejectionReason: {   // Optional reason when status=rejected
-    type: String,
-    trim: true
-  },
-  isEscalated: {       // Optional escalation flag
-    type: Boolean,
-    default: false
-  },
-  category: {          // Optional ticket classification
-    type: String,
-    trim: true
-  },
-  tags: [String]       // Optional tags for flexible filtering
-},
-  {
-    timestamps: true,
-  }
-);
-
-ticketSchema.pre('save', function(next) {
-  if (this.isModified('status')) {
-    if (['resolved'].includes(this.status)) {
-      this.resolvedAt = new Date();
-      this.closedAt = undefined;
-    } else if (this.status === 'closed') {
-      if (!this.resolvedAt) this.resolvedAt = new Date();
-      this.closedAt = new Date();
-    } else {
-      this.resolvedAt = undefined;
-      this.closedAt = undefined;
+    {
+      fields: ['priority']
+    },
+    {
+      fields: ['assigned_to']
+    },
+    {
+      fields: ['created_by']
+    },
+    {
+      fields: ['status', 'priority']
+    },
+    {
+      fields: ['due_date']
+    }
+  ],
+  hooks: {
+    beforeUpdate: (ticket) => {
+      if (ticket.changed('status')) {
+        if (['resolved'].includes(ticket.status)) {
+          ticket.resolved_at = new Date();
+          ticket.closed_at = null;
+        } else if (ticket.status === 'closed') {
+          if (!ticket.resolved_at) {
+            ticket.resolved_at = new Date();
+          }
+          ticket.closed_at = new Date();
+        } else {
+          ticket.resolved_at = null;
+          ticket.closed_at = null;
+        }
+      }
     }
   }
-  next();
 });
 
-// Indexes
-ticketSchema.index({ status: 1 });
-ticketSchema.index({ priority: 1 });
-ticketSchema.index({ assignedTo: 1 });
-ticketSchema.index({ createdBy: 1 });
-ticketSchema.index({ status: 1, priority: 1 });
+// Define associations
+Ticket.associate = (models) => {
+  Ticket.belongsTo(models.Employee, {
+    as: 'creator',
+    foreignKey: 'created_by'
+  });
 
-export default mongoose.model('Ticket', ticketSchema);
+  Ticket.belongsTo(models.Employee, {
+    as: 'assignee',
+    foreignKey: 'assigned_to'
+  });
+
+  Ticket.hasMany(models.TicketAttachment, {
+    as: 'attachments',
+    foreignKey: 'ticket_id'
+  });
+
+  Ticket.hasMany(models.TicketComment, {
+    as: 'comments',
+    foreignKey: 'ticket_id'
+  });
+
+  Ticket.hasMany(models.TicketEvent, {
+    as: 'events',
+    foreignKey: 'ticket_id'
+  });
+};
+
+export default Ticket;

@@ -1,59 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchHardware } from '../../store/slices/assetSlice';
 import AssetRow from './AssetRow';
 import Pagination from './Pagination';
 
-const mockAssets = [
-    {
-    id: 1,
-    type: "Laptop",
-    model: "MacBook Pro 16\"",
-    status: "Active",
-    assignedTo: "Manisha Kukreja",
-  },
-  {
-    id: 2,
-    type: "Desktop",
-    model: "Dell OptiPlex 7090",
-    status: "Active",
-    assignedTo: "Sonu Kumar",
-  },
-  {
-    id: 3,
-    type: "Phone",
-    model: "iPhone 14 Pro",
-    status: "Maintenance",
-    assignedTo: "Unassigned",
-  },
-  {
-    id: 4,
-    type: "Monitor",
-    model: "LG UltraWide 34\"",
-    status: "Active",
-    assignedTo: "Sukhleen Kaur",
-  },
-  {
-    id: 5,
-    type: "Printer",
-    model: "HP LaserJet Pro",
-    status: "Inactive",
-    assignedTo: "Shared Resource",
-  },
-  {
-    id: 6,
-    type: "Phone",
-    model: "Samsung Galaxy S23",
-    status: "Active",
-    assignedTo: "Ravi Gupta",
-  }
-];
-
-const AssetTable = () => {
+const AssetTable = ({ filters, onEdit, onView }) => {
+    const dispatch = useDispatch();
+    const { list: hardwareList, status } = useSelector(state => state.assets);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
+    const itemsPerPage = 10;
 
-    const totalPages = Math.ceil(mockAssets.length / itemsPerPage);
+    useEffect(() => {
+        dispatch(fetchHardware());
+    }, [dispatch]);
+
+    // Filter assets based on applied filters
+    const filteredAssets = hardwareList.filter(asset => {
+        if (filters.type && asset.type !== filters.type) return false;
+        if (filters.status && asset.status !== filters.status) return false;
+        return true;
+    });
+
+    const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentAssets = mockAssets.slice(startIndex, startIndex + itemsPerPage);
+    const currentAssets = filteredAssets.slice(startIndex, startIndex + itemsPerPage);
+
+    if (status.fetch === 'loading') {
+        return (
+            <div className='bg-white shadow rounded-lg p-8'>
+                <div className='text-center'>Loading hardware assets...</div>
+            </div>
+        );
+    }
     
     return (
         <div className='bg-white shadow rounded-lg p-4'>
@@ -62,7 +40,9 @@ const AssetTable = () => {
                     <thead className='bg-gray-100 text-gray-700 uppercase text-xs'>
                         <tr>
                             <th className='px-4 py-2'>Asset Type</th>
-                            <th className='px-4 py-2'>Model</th>
+                            <th className='px-4 py-2'>Name</th>
+                            <th className='px-4 py-2'>Brand/Model</th>
+                            <th className='px-4 py-2'>Serial Number</th>
                             <th className='px-4 py-2'>Status</th>
                             <th className='px-4 py-2'>Assigned To</th>
                             <th className='px-4 py-2'>Actions</th>
@@ -71,15 +51,17 @@ const AssetTable = () => {
                     <tbody>
                       {currentAssets.length === 0 ? (
                         <tr>
-                          <td colSpan="5" className='text-center py-4 text-gray-500'>
-                            No assets found.
+                          <td colSpan="7" className='text-center py-4 text-gray-500'>
+                            No hardware assets found.
                           </td>
                         </tr>
                         ) : (
                           currentAssets.map((asset) => (
                             <AssetRow
-                                key={asset.id}
+                                key={asset._id}
                                 asset={asset}
+                                onEdit={onEdit}
+                                onView={onView}
                             />
                       ))
                     )}
@@ -87,12 +69,14 @@ const AssetTable = () => {
                 </table>
             </div>
 
-            <div className='mt-4'>
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage} />
-            </div>
+            {totalPages > 1 && (
+                <div className='mt-4'>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage} />
+                </div>
+            )}
         </div>
     )
 };

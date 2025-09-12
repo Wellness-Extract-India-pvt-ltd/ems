@@ -1,62 +1,113 @@
-import mongoose from 'mongoose';
-const { Schema } = mongoose;
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
-const departmentSchema = new Schema({
+const Department = sequelize.define('Department', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   name: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    trim: true
+    validate: {
+      notEmpty: true,
+      len: [1, 100]
+    }
   },
   code: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    uppercase: true,
-    trim: true
+    validate: {
+      notEmpty: true,
+      len: [1, 10],
+      isUppercase: true
+    }
   },
   description: {
-    type: String,
-    trim: true
+    type: DataTypes.TEXT,
+    allowNull: true
   },
-  manager: {
-    type: Schema.Types.ObjectId,
-    ref: 'Employee'
+  manager_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
   },
-  headOfDepartment: {
-    type: Schema.Types.ObjectId,
-    ref: 'Employee'
+  head_of_department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
   },
   location: {
-    type: String,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 100]
+    }
   },
   budget: {
-    type: Number,
-    min: 0
+    type: DataTypes.DECIMAL(15, 2),
+    allowNull: true,
+    validate: {
+      min: 0
+    }
   },
-  isActive: {
-    type: Boolean,
-    default: true
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   },
-  parentDepartment: {
-    type: Schema.Types.ObjectId,
-    ref: 'Department'
+  parent_department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'departments',
+      key: 'id'
+    }
   }
 }, {
-  timestamps: true
+  tableName: 'departments',
+  timestamps: true,
+  underscored: true,
+  indexes: []
 });
 
-// Virtual for employee count
-departmentSchema.virtual('employeeCount', {
-  ref: 'Employee',
-  localField: '_id',
-  foreignField: 'employment.department',
-  count: true
-});
+// Define associations
+Department.associate = (models) => {
+  // Self-referencing association for parent department
+  Department.belongsTo(models.Department, {
+    as: 'parentDepartment',
+    foreignKey: 'parent_department_id'
+  });
+  
+  Department.hasMany(models.Department, {
+    as: 'subDepartments',
+    foreignKey: 'parent_department_id'
+  });
 
-// Ensure virtuals are serialized
-departmentSchema.set('toJSON', { virtuals: true });
-departmentSchema.set('toObject', { virtuals: true });
+  // Association with Employee for manager and head of department
+  Department.belongsTo(models.Employee, {
+    as: 'manager',
+    foreignKey: 'manager_id'
+  });
 
-export default mongoose.model('Department', departmentSchema);
+  Department.belongsTo(models.Employee, {
+    as: 'headOfDepartment',
+    foreignKey: 'head_of_department_id'
+  });
+
+  // Association with Employee for department employees
+  Department.hasMany(models.Employee, {
+    as: 'employees',
+    foreignKey: 'department_id'
+  });
+};
+
+export default Department;

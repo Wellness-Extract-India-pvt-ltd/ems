@@ -6,6 +6,8 @@ import userReducer from './slices/userSlice';
 import authReducer from './slices/authSlice';
 import softwareReducer from './slices/softwareSlice';
 import integrationsReducer from './slices/integrationSlice';
+import licenseReducer from './slices/licenseSlice';
+import ticketReducer from './slices/ticketSlice';
 
 const store = configureStore({
     reducer: {
@@ -14,6 +16,8 @@ const store = configureStore({
         employees: employeeReducer,
         assets: assetReducer,
         software: softwareReducer,
+        licenses: licenseReducer,
+        tickets: ticketReducer,
         integrations: integrationsReducer,
     },
 
