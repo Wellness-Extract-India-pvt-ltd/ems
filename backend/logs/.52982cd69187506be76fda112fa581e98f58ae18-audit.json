@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 90
+    },
+    "auditLog": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\.52982cd69187506be76fda112fa581e98f58ae18-audit.json",
+    "files": [
+        {
+            "date": 1758257967367,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\security-2025-09-19.log",
+            "hash": "90fbf59e93fc46b12cf6745cec88763b66d7141d28c9dcd9af6aee1790a015e8"
+        },
+        {
+            "date": 1758524597654,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\security-2025-09-22.log",
+            "hash": "7a1603be2ae16bd75da15eb1fea735254d590b0f66c69e8bad307ea7f030dc04"
+        },
+        {
+            "date": 1758606513781,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\security-2025-09-23.log",
+            "hash": "b137b781553ff88ad282bd60ece6c4aff3acce6face5299b1dcea2a4b11e41af"
+        }
+    ],
+    "hashType": "sha256"
+}

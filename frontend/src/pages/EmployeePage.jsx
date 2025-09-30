@@ -19,8 +19,13 @@ const EmployeePage = () => {
     const navigate = useNavigate()
 
     const employees = useSelector((state) => state.employees.list)
-    const loading = useSelector((state) => state.employees.loading)
-    const error = useSelector((state) => state.employees.error)
+    const loading = useSelector((state) => state.employees.status.fetch === 'loading')
+    const error = useSelector((state) => state.employees.error.fetch)
+    
+    // Debug logging
+    console.log('EmployeePage - employees data:', employees);
+    console.log('EmployeePage - loading:', loading);
+    console.log('EmployeePage - error:', error);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,9 +37,13 @@ const EmployeePage = () => {
         dispatch(fetchEmployees());
     }, [dispatch]);
 
-    const filteredEmployees = (employees || []).filter((emp) =>
-  (emp?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-);
+    // Ensure employees is an array before filtering
+    const employeesList = Array.isArray(employees) ? employees : [];
+    const filteredEmployees = employeesList.filter((emp) => {
+        const fullName = emp?.name || `${emp?.first_name || ''} ${emp?.last_name || ''}`.trim();
+        return fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               (emp?.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
 
     const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);

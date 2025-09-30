@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\tests\\logs\\.94e3c7184453ec4414a7ee777c2605cd1f43b54f-audit.json",
+    "files": [
+        {
+            "date": 1758085391780,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\tests\\logs\\exceptions-2025-09-17.log",
+            "hash": "65845db3d18d2b30f23d95881a96c3da815f183370b804814c843a4850074837"
+        },
+        {
+            "date": 1758175462553,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\tests\\logs\\exceptions-2025-09-18.log",
+            "hash": "26394176841591d39b94bbcdcad79870f639ef7fb229afc60dfc98f49844a0c4"
+        }
+    ],
+    "hashType": "sha256"
+}

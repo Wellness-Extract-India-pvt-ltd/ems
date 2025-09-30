@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-hot-toast';
-import { addAsset, updateAsset } from '../../store/slices/assetSlice';
+import { createHardware, updateHardware } from '../../store/slices/assetSlice';
 import { ASSET_TYPES, STATUS_OPTIONS } from '../../constants/assetOptions';
 
 const AssetForm = ({ initialData = null, onCancel }) => {
@@ -31,10 +31,10 @@ const AssetForm = ({ initialData = null, onCancel }) => {
         const payload = { type, model, status, assignedTo };
         
         if (initialData) {
-            dispatch(updateAsset({ id: initialData.id, ...payload }));
+            dispatch(updateHardware({ id: initialData.id, hardwareData: payload }));
             toast.success('Asset updated successfully.');
         } else {
-            dispatch(addAsset(payload));
+            dispatch(createHardware(payload));
             toast.success('Asset added successfully.');
         }
 

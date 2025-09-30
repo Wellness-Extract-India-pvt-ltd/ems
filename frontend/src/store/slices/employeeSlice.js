@@ -1,6 +1,6 @@
 // src/store/slices/employeeSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../api/axios.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
@@ -9,7 +9,7 @@ export const fetchEmployees = createAsyncThunk(
   'employees/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_BASE}/employees/all`);
+      const { data } = await api.get('/employees/all');
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -26,7 +26,7 @@ export const createEmployee = createAsyncThunk(
 for (let [key, value] of formData.entries()) {
   console.log(`${key}:`, value instanceof File ? value.name : value);
 }
-      const { data } = await axios.post(`${API_BASE}/employees/add`, formData, {
+      const { data } = await api.post('/employees/add', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -42,7 +42,7 @@ export const updateEmployee = createAsyncThunk(
   'employees/update',
   async ({ id, payload }, { rejectWithValue }) => {
     try {
-      const { data } = await axios.put(`${API_BASE}/employees/update/${id}`, payload);
+      const { data } = await api.put(`/employees/update/${id}`, payload);
       return data.employee;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -54,7 +54,7 @@ export const deleteEmployee = createAsyncThunk(
   'employees/delete',
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_BASE}/employees/delete/${id}`);
+      await api.delete(`/employees/delete/${id}`);
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -105,7 +105,8 @@ const employeeSlice = createSlice({
       })
       .addCase(fetchEmployees.fulfilled, (state, action) => {
         state.status.fetch = 'succeeded';
-        state.list = action.payload;
+        // Handle both array and object responses
+        state.list = Array.isArray(action.payload) ? action.payload : action.payload.employees || [];
       })
       .addCase(fetchEmployees.rejected, (state, action) => {
         state.status.fetch = 'failed';

@@ -1,0 +1,24 @@
+{
+  "name": "ems-backend-tests",
+  "version": "1.0.0",
+  "description": "Test suite for EMS Backend",
+  "type": "module",
+  "scripts": {
+    "test": "node run-all-tests.js",
+    "test:all": "node run-all-tests.js",
+    "test:unit": "npx vitest run unit/",
+    "test:integration": "npx vitest run integration/",
+    "test:database": "npx vitest run database/",
+    "test:external": "node external/basic-ms-graph-test.js",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "test:unit-watch": "vitest --watch unit/",
+    "test:integration-watch": "vitest --watch integration/",
+    "test:database-watch": "vitest --watch database/"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  }
+}

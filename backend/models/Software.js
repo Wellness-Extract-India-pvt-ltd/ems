@@ -1,81 +1,314 @@
-import mongoose from "mongoose";
+/**
+ * Software Model
+ * Represents software asset data in the EMS system
+ */
 
-const STATUSES = ['active', 'inactive', 'expired'];
+import { DataTypes } from 'sequelize'
+import sequelize from '../database/connection.js'
 
-const softwareSchema = new mongoose.Schema({
+const Software = sequelize.define(
+  'Software',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
-        trim: true
+      type: DataTypes.STRING(200),
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+        len: [2, 200]
+      }
     },
     version: {
-        type: String,
-        required: true,
-        trim: true
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      validate: {
+        len: [0, 50]
+      }
     },
     vendor: {
-        type: String,
-        required: true,
-        trim: true
+      type: DataTypes.STRING(200),
+      allowNull: true,
+      validate: {
+        len: [0, 200]
+      }
     },
-    licenseKey: {
-        type: String,
-        unique: true,
-        sparse: true,
-        trim: true,
-        select: false
+    category: {
+      type: DataTypes.ENUM(
+        'Operating System',
+        'Office Suite',
+        'Development Tools',
+        'Design Software',
+        'Database',
+        'Security',
+        'Web Browser',
+        'Media Player',
+        'Antivirus',
+        'Backup Software',
+        'Cloud Service',
+        'Other'
+      ),
+      allowNull: false,
+      validate: {
+        isIn: [
+          [
+            'Operating System',
+            'Office Suite',
+            'Development Tools',
+            'Design Software',
+            'Database',
+            'Security',
+            'Web Browser',
+            'Media Player',
+            'Antivirus',
+            'Backup Software',
+            'Cloud Service',
+            'Other'
+          ]
+        ]
+      }
     },
-    purchaseDate: {
-    type: Date,
-    required: true,
-    validate: {
-      validator: date => date <= new Date(),
-      message: "Purchase date cannot be in the future"
-    }
-  },
-    expiryDate: {
-        type: Date,
-        validate: {
-        validator: function (value) {
-          return !value || value > this.purchaseDate;
-        },
-        message: "Expiry date must be after purchase date",
-      },
+    license_type: {
+      type: DataTypes.ENUM(
+        'Perpetual',
+        'Subscription',
+        'Open Source',
+        'Freeware',
+        'Trial',
+        'Enterprise',
+        'Volume License'
+      ),
+      allowNull: false,
+      validate: {
+        isIn: [
+          [
+            'Perpetual',
+            'Subscription',
+            'Open Source',
+            'Freeware',
+            'Trial',
+            'Enterprise',
+            'Volume License'
+          ]
+        ]
+      }
+    },
+    purchase_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true,
+        isBefore: new Date().toISOString().split('T')[0]
+      }
+    },
+    purchase_price: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      validate: {
+        isDecimal: true,
+        min: 0
+      }
+    },
+    renewal_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true
+      }
     },
     status: {
-        type: String,
-        required: true,
-        enum: STATUSES,
-        default: 'active'
+      type: DataTypes.ENUM(
+        'Active',
+        'Inactive',
+        'Expired',
+        'Suspended',
+        'Maintenance',
+        'Deprecated'
+      ),
+      allowNull: false,
+      defaultValue: 'Active',
+      validate: {
+        isIn: [
+          [
+            'Active',
+            'Inactive',
+            'Expired',
+            'Suspended',
+            'Maintenance',
+            'Deprecated'
+          ]
+        ]
+      }
     },
-    assignedTo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Employee',
-        validate: {
-        validator: async function (value) {
-          if (!value) return true;
-          const employeeExists = await mongoose.model("Employee").exists({ _id: value });
-        return employeeExists != null;
-        },
-        message: "Employee does not exist",
+    assigned_to: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'employees',
+        key: 'id'
       },
+      validate: {
+        isInt: true,
+        min: 1
+      }
     },
+    assigned_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true,
+        isBefore: new Date().toISOString().split('T')[0]
+      }
+    },
+    installation_path: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      validate: {
+        len: [0, 500]
+      }
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      validate: {
+        len: [0, 2000]
+      }
+    },
+    system_requirements: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      validate: {
+        isValidJSON (value) {
+          if (value !== null && typeof value !== 'object') {
+            throw new Error('System requirements must be a valid JSON object')
+          }
+        }
+      }
+    },
+    support_level: {
+      type: DataTypes.ENUM(
+        'Basic',
+        'Standard',
+        'Premium',
+        'Enterprise',
+        'None'
+      ),
+      allowNull: true,
+      defaultValue: 'Basic',
+      validate: {
+        isIn: [['Basic', 'Standard', 'Premium', 'Enterprise', 'None']]
+      }
+    },
+    compliance_status: {
+      type: DataTypes.ENUM(
+        'Compliant',
+        'Non-Compliant',
+        'Pending',
+        'Under Review'
+      ),
+      allowNull: true,
+      defaultValue: 'Pending',
+      validate: {
+        isIn: [['Compliant', 'Non-Compliant', 'Pending', 'Under Review']]
+      }
+    },
+    department_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'departments',
+        key: 'id'
+      },
+      validate: {
+        isInt: true,
+        min: 1
+      }
+    }
   },
- {
-    timestamps: true
-});
-
-softwareSchema.pre("save", function (next) {
-  if (this.expiryDate && this.expiryDate < new Date()) {
-    this.status = "expired";
+  {
+    tableName: 'software',
+    timestamps: true,
+    underscored: true,
+    indexes: [
+      {
+        fields: ['name']
+      },
+      {
+        fields: ['vendor']
+      },
+      {
+        fields: ['category']
+      },
+      {
+        fields: ['status']
+      },
+      {
+        fields: ['assigned_to']
+      },
+      {
+        fields: ['license_type']
+      },
+      {
+        fields: ['department_id']
+      },
+      {
+        fields: ['purchase_date']
+      },
+      {
+        fields: ['renewal_date']
+      },
+      {
+        fields: ['compliance_status']
+      }
+    ],
+    validate: {
+      purchasePriceMustBePositive () {
+        if (this.purchase_price !== null && this.purchase_price < 0) {
+          throw new Error('Purchase price must be positive')
+        }
+      },
+      renewalDateAfterPurchase () {
+        if (
+          this.purchase_date &&
+          this.renewal_date &&
+          new Date(this.renewal_date) <= new Date(this.purchase_date)
+        ) {
+          throw new Error('Renewal date must be after purchase date')
+        }
+      },
+      assignedDateAfterPurchase () {
+        if (
+          this.purchase_date &&
+          this.assigned_date &&
+          new Date(this.assigned_date) < new Date(this.purchase_date)
+        ) {
+          throw new Error('Assigned date cannot be before purchase date')
+        }
+      },
+      assignedToRequiredWhenAssigned () {
+        if (
+          this.status === 'Active' &&
+          this.assigned_to &&
+          !this.assigned_date
+        ) {
+          throw new Error('Assigned software must have an assigned date')
+        }
+      },
+      subscriptionMustHaveRenewalDate () {
+        if (this.license_type === 'Subscription' && !this.renewal_date) {
+          throw new Error('Subscription software must have a renewal date')
+        }
+      },
+      versionRequiredForActive () {
+        if (this.status === 'Active' && !this.version) {
+          throw new Error('Active software should have a version specified')
+        }
+      }
+    }
   }
-  next();
-});
+)
 
-// Indexes
-softwareSchema.index({ name: 1 });
-softwareSchema.index({ vendor: 1 });
-softwareSchema.index({ status: 1 });
-softwareSchema.index({ assignedTo: 1 });
-
-export default mongoose.model("Software", softwareSchema);
+export default Software

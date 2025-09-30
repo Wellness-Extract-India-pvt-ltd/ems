@@ -1,10 +1,10 @@
 // components/Software/SoftwareRow.jsx
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { Eye, Edit, Trash2 } from 'lucide-react';
+import { deleteSoftware } from '../../store/slices/softwareSlice';
 
-<<<<<<< Updated upstream
-const SoftwareRow = ({ software }) => {
-  const { name, users, permissions, description } = software;
-=======
 const SoftwareRow = ({ software, onEdit, onView }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,16 +20,10 @@ const SoftwareRow = ({ software, onEdit, onView }) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
->>>>>>> Stashed changes
 
   return (
     <tr className="border-b hover:bg-gray-50">
       <td className="px-4 py-2 font-medium">{name}</td>
-<<<<<<< Updated upstream
-      <td className="px-4 py-2">{users.join(', ')}</td>
-      <td className="px-4 py-2">{permissions.join(', ')}</td>
-      <td className="px-4 py-2">{description}</td>
-=======
       <td className="px-4 py-2">{version}</td>
       <td className="px-4 py-2">{vendor}</td>
       <td className="px-4 py-2">
@@ -47,7 +41,7 @@ const SoftwareRow = ({ software, onEdit, onView }) => {
       <td className="px-4 py-2">
         <div className="flex space-x-2">
           <button
-            onClick={() => navigate(`/software/${id}`)}
+            onClick={() => onView && onView(software)}
             className="p-1 text-blue-600 hover:text-blue-800"
             title="View Details"
           >
@@ -69,7 +63,6 @@ const SoftwareRow = ({ software, onEdit, onView }) => {
           </button>
         </div>
       </td>
->>>>>>> Stashed changes
     </tr>
   );
 };

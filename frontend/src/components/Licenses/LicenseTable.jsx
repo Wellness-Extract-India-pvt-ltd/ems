@@ -2,6 +2,9 @@ import React from 'react';
 import LicenseRow from './LicenseRow';
 
 const LicenseTable = ({ licenses, onEdit, onView }) => {
+  // Ensure licenses is an array
+  const licensesList = Array.isArray(licenses) ? licenses : [];
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left">
@@ -18,14 +21,14 @@ const LicenseTable = ({ licenses, onEdit, onView }) => {
           </tr>
         </thead>
         <tbody>
-          {licenses.length === 0 ? (
+          {licensesList.length === 0 ? (
             <tr>
               <td colSpan="8" className="text-center py-8 text-gray-500">
                 No licenses found. Add your first software license.
               </td>
             </tr>
           ) : (
-            licenses.map(license => (
+            licensesList.map(license => (
               <LicenseRow 
                 key={license.id} 
                 license={license} 

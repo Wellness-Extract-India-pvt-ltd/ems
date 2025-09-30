@@ -1,36 +1,34 @@
 # Dependencies
-node_modules
+node_modules/
 npm-debug.log*
+npm-error.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment files
-.env
-.env.local
-.env.development
-.env.test
-.env.production
+.env*
+!.env.example
 
 # Logs
-logs
+logs/
 *.log
 
 # Runtime data
-pids
+pids/
 *.pid
 *.seed
 *.pid.lock
 
 # Coverage directory used by tools like istanbul
-coverage
-
-# nyc test coverage
-.nyc_output
+coverage/
+.nyc_output/
 
 # Dependency directories
 node_modules/
 jspm_packages/
 
 # Optional npm cache directory
-.npm
+.npm/
 
 # Optional REPL history
 .node_repl_history
@@ -38,17 +36,39 @@ jspm_packages/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
+# Yarn files
 .yarn-integrity
+.yarn/
+.yarnrc*
 
-# dotenv environment variables file
-.env
+# Test files and directories
+test/
+tests/
+__tests__/
+*.test.js
+*.test.ts
+*.test.jsx
+*.test.tsx
+*.spec.js
+*.spec.ts
+*.spec.jsx
+*.spec.tsx
+coverage/
 
-# IDE files
-.vscode
-.idea
+# Build artifacts and temporary files
+dist/
+build/
+.tmp/
+tmp/
+*.tmp
+*.temp
+
+# IDE and editor files
+.vscode/
+.idea/
 *.swp
 *.swo
+*~
 
 # OS generated files
 .DS_Store
@@ -58,15 +78,66 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
 # Git
-.git
+.git/
 .gitignore
+.gitattributes
 
-# Docker
-Dockerfile
+# Docker files
+Dockerfile*
 .dockerignore
+docker-compose*.yml
+.docker/
 
 # Documentation
 README.md
 *.md
+docs/
+
+# Development and configuration files
+.eslintrc*
+.prettierrc*
+jest.config.*
+babel.config.*
+webpack.config.*
+vite.config.*
+rollup.config.*
+tsconfig*.json
+nodemon.json
+
+# Security and sensitive files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Lock files (keep package-lock.json for production)
+yarn.lock
+pnpm-lock.yaml
+
+# Performance and profiling
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache

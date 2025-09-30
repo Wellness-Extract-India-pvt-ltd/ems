@@ -26,10 +26,10 @@ const EmployeeTable = ({
 
     return (
         <div className='overflow-x-auto bg-white rounded-lg shadow'>
-            <table className='min-w-full text-sm text-left'>
+            <table className='min-w-full text-sm text-left table-fixed' style={{ tableLayout: 'fixed' }}>
                 <thead className='bg-gray-100 text-gray-600 font-medium'>
                     <tr>
-                        <th className='px-4 py-3'>
+                        <th className='px-4 py-3 w-12'>
                             <input
                                 type="checkbox"
                                 checked={isAllSelected}
@@ -38,12 +38,12 @@ const EmployeeTable = ({
                                 aria-label="Select all employees"
                             />
                         </th>
-                        <th className='px-4 py-3'>Name</th>
-                        <th className='px-4 py-3'>Email</th>
-                        <th className='px-4 py-3'>Department</th>
-                        <th className='px-4 py-3'>Role</th>
-                        <th className='px-4 py-3'>Status</th>
-                        <th className='px-4 py-3'>Actions</th>
+                        <th className='px-4 py-3 w-1/4'>Name</th>
+                        <th className='px-4 py-3 w-1/4'>Email</th>
+                        <th className='px-4 py-3 w-1/6'>Department</th>
+                        <th className='px-4 py-3 w-1/6'>Role</th>
+                        <th className='px-4 py-3 w-20'>Status</th>
+                        <th className='px-4 py-3 w-24'>Actions</th>
                     </tr>
                 </thead>
 

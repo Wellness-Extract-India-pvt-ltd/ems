@@ -165,7 +165,7 @@ const AddEmployeeForm = () => {
     onSubmit={handleSubmit}
     className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-7xl text-sm"
   >
-    {/* ====================== Personal Information ====================== */}
+    {/* = Personal Information = */}
     <SectionHeader Icon={User} text="Personal Information" />
 
     <div className="flex flex-col items-center gap-2 my-6">
@@ -196,7 +196,7 @@ const AddEmployeeForm = () => {
       <Select label="Marital Status" name="maritalStatus" value={personal.maritalStatus} onChange={handleState(setPersonal)} options={["Single", "Married", "Divorced", "Widowed"]} />
     </div>
 
-    {/* ====================== Contact Information ====================== */}
+    {/* = Contact Information = */}
     <SectionHeader Icon={Mail} text="Contact Information" className="mt-10" />
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -206,7 +206,7 @@ const AddEmployeeForm = () => {
       <Textarea className="md:col-span-3" label="Address" name="address" placeholder="Enter full address" value={contact.address} onChange={handleState(setContact)} />
     </div>
 
-    {/* ====================== Education Details ====================== */}
+    {/* = Education Details = */}
     <SectionHeader Icon={GraduationCap} text="Education Details" className="mt-10" />
 
     {educations.map((edu, index) => (
@@ -233,7 +233,7 @@ const AddEmployeeForm = () => {
     ))}
     <AddAnotherButton label="Add Another Education" onClick={handleAddEducation} />
 
-    {/* ====================== Previous Organization ====================== */}
+    {/* = Previous Organization = */}
     <SectionHeader Icon={RotateCcw} text="Previous Organization Details" className="mt-10" />
 
     {organisations.map((org, index) => (
@@ -261,7 +261,7 @@ const AddEmployeeForm = () => {
     ))}
     <AddAnotherButton label="Add Another Organization" onClick={handleAddOrganisation} />
 
-    {/* ====================== Bank Details ====================== */}
+    {/* = Bank Details = */}
     <SectionHeader Icon={Banknote} text="Bank Details & Documents" className="mt-10" />
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -276,7 +276,7 @@ const AddEmployeeForm = () => {
       onFileChange={handleFile(setBank, 'passbookFile')}
     />
 
-    {/* ====================== Employment Details ====================== */}
+    {/* = Employment Details = */}
     <SectionHeader Icon={Briefcase} text="Employment Details" className="mt-10" />
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -291,7 +291,7 @@ const AddEmployeeForm = () => {
       <Input label="Work Schedule" name="workSchedule" value={employment.workSchedule} onChange={handleState(setEmployment)} placeholder="e.g., 9am - 6pm" />
     </div>
 
-    {/* ====================== Action Buttons ====================== */}
+    {/* = Action Buttons = */}
     <div className="flex justify-between items-center mt-12 flex-wrap gap-4">
         <p className="text-gray-500"><span className="font-medium">*</span> Fields marked with * are required</p>
         <div className="flex gap-3 ml-auto">

@@ -1,30 +1,30 @@
 {
-    "keep": {
-        "days": true,
-        "amount": 30
+  "keep": {
+    "days": true,
+    "amount": 30
+  },
+  "auditLog": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\.36696f8ed1edec65a5cd037455b8419f2f8da341-audit.json",
+  "files": [
+    {
+      "date": 1756377114787,
+      "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-08-28.log",
+      "hash": "fac1ffe57926e1086dd369bb8cd736953cb7e188268addeef426c2ff83019f56"
     },
-    "auditLog": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\.36696f8ed1edec65a5cd037455b8419f2f8da341-audit.json",
-    "files": [
-        {
-            "date": 1756377114787,
-            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-08-28.log",
-            "hash": "fac1ffe57926e1086dd369bb8cd736953cb7e188268addeef426c2ff83019f56"
-        },
-        {
-            "date": 1757306696673,
-            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-09-08.log",
-            "hash": "29d618013b0dfe71414cf771ed71a82c6a5dacc0df76df20eb0b44b43f21a75e"
-        },
-        {
-            "date": 1757579825318,
-            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-09-11.log",
-            "hash": "33b275d0c5f3982c62b484b85da561d5c957f36f5226df0e1a3c97f40bf82f8b"
-        },
-        {
-            "date": 1757654792259,
-            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-09-12.log",
-            "hash": "5315339a90a811b4915fec659f1afa18b98a181ec89bfd9d4d787567e86f149f"
-        }
-    ],
-    "hashType": "sha256"
+    {
+      "date": 1757306696673,
+      "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-09-08.log",
+      "hash": "29d618013b0dfe71414cf771ed71a82c6a5dacc0df76df20eb0b44b43f21a75e"
+    },
+    {
+      "date": 1757579825318,
+      "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-09-11.log",
+      "hash": "33b275d0c5f3982c62b484b85da561d5c957f36f5226df0e1a3c97f40bf82f8b"
+    },
+    {
+      "date": 1757654792259,
+      "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\combined-2025-09-12.log",
+      "hash": "5315339a90a811b4915fec659f1afa18b98a181ec89bfd9d4d787567e86f149f"
+    }
+  ],
+  "hashType": "sha256"
 }

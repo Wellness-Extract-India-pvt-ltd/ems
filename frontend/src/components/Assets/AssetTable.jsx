@@ -1,60 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchHardware, setCurrentPage } from '../../store/slices/hardwareSlice';
 import AssetRow from './AssetRow';
 import Pagination from './Pagination';
 
-const mockAssets = [
-    {
-    id: 1,
-    type: "Laptop",
-    model: "MacBook Pro 16\"",
-    status: "Active",
-    assignedTo: "Manisha Kukreja",
-  },
-  {
-    id: 2,
-    type: "Desktop",
-    model: "Dell OptiPlex 7090",
-    status: "Active",
-    assignedTo: "Sonu Kumar",
-  },
-  {
-    id: 3,
-    type: "Phone",
-    model: "iPhone 14 Pro",
-    status: "Maintenance",
-    assignedTo: "Unassigned",
-  },
-  {
-    id: 4,
-    type: "Monitor",
-    model: "LG UltraWide 34\"",
-    status: "Active",
-    assignedTo: "Sukhleen Kaur",
-  },
-  {
-    id: 5,
-    type: "Printer",
-    model: "HP LaserJet Pro",
-    status: "Inactive",
-    assignedTo: "Shared Resource",
-  },
-  {
-    id: 6,
-    type: "Phone",
-    model: "Samsung Galaxy S23",
-    status: "Active",
-    assignedTo: "Ravi Gupta",
-  }
-];
+const AssetTable = ({ filters, onEdit, onView }) => {
+    const dispatch = useDispatch();
+    const { hardware, loading, error, pagination } = useSelector(state => state.hardware);
+    const [currentPage, setCurrentPageLocal] = useState(1);
 
-const AssetTable = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
+    // Fetch hardware data when component mounts or filters change
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await dispatch(fetchHardware({
+                    page: currentPage,
+                    limit: 10,
+                    ...filters
+                }));
+            } catch (error) {
+                console.error('Failed to fetch hardware:', error);
+            }
+        };
+        
+        fetchData();
+    }, [dispatch, currentPage, filters]);
 
-    const totalPages = Math.ceil(mockAssets.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentAssets = mockAssets.slice(startIndex, startIndex + itemsPerPage);
+    const handlePageChange = (newPage) => {
+        setCurrentPageLocal(newPage);
+        dispatch(setCurrentPage(newPage));
+    };
     
+    if (loading) {
+        return (
+            <div className='bg-white shadow rounded-lg p-4'>
+                <div className='flex items-center justify-center py-8'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+                    <span className='ml-2 text-gray-600'>Loading assets...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className='bg-white shadow rounded-lg p-4'>
+                <div className='text-center py-8'>
+                    <div className='text-red-600 mb-2'>Error loading assets</div>
+                    <div className='text-gray-500 text-sm'>{error}</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className='bg-white shadow rounded-lg p-4'>
             <div className='overflow-x-auto'>
@@ -69,17 +67,19 @@ const AssetTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                      {currentAssets.length === 0 ? (
+                      {hardware.length === 0 ? (
                         <tr>
                           <td colSpan="5" className='text-center py-4 text-gray-500'>
-                            No assets found.
+                            No assets found. Add some hardware assets to get started.
                           </td>
                         </tr>
                         ) : (
-                          currentAssets.map((asset) => (
+                          hardware.map((asset) => (
                             <AssetRow
                                 key={asset.id}
                                 asset={asset}
+                                onEdit={onEdit}
+                                onView={onView}
                             />
                       ))
                     )}
@@ -87,12 +87,14 @@ const AssetTable = () => {
                 </table>
             </div>
 
-            <div className='mt-4'>
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage} />
-            </div>
+            {pagination.totalPages > 1 && (
+                <div className='mt-4'>
+                    <Pagination
+                        currentPage={pagination.currentPage}
+                        totalPages={pagination.totalPages}
+                        onPageChange={handlePageChange} />
+                </div>
+            )}
         </div>
     )
 };

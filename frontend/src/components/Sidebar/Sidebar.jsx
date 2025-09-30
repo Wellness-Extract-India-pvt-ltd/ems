@@ -11,7 +11,10 @@ import {
     Settings,
     Puzzle,
     X,
-    LogOut
+    LogOut,
+    Clock,
+    MessageCircle,
+    Bot
 } from "lucide-react";
 import classNames from "classnames";
 import { useAuth } from "../../auth/context/AuthProvider";
@@ -25,6 +28,8 @@ const menuItems = [
     { name: 'Software', path: '/software', icon: <Monitor size={18} /> },
     { name: 'Licenses', path: '/licenses', icon: <BadgeCheck size={18} /> },
     { name: 'Tickets', path: '/tickets', icon: <LifeBuoy size={18} /> },
+    { name: 'Wellness AI', path: '/chat', icon: <Bot size={18} /> },
+    { name: 'BioMetrics', path: '/biometrics', icon: <Clock size={18} />, roles: ['admin', 'manager'] },
     { name: 'Audit Logs', path: '/audit-logs', icon: <FileText size={18} />, roles: ['admin'] },
     { name: 'Integrations', path: '/integrations', icon: <Puzzle size={18} />, roles: ['admin'] }
 ];

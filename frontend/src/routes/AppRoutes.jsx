@@ -12,14 +12,18 @@ import EmployeeDetailsPage from '../pages/EmployeeDetailPage';
 import AssignedAssets from '../components/Employees/EmployeeDetails/AssignedAssets';
 import EmployeeLicenses from '../components/Employees/EmployeeDetails/Licenses'
 import EmployeeTickets from '../components/Employees/EmployeeDetails/Tickets'
-import Licenses from '../components/Employees/EmployeeDetails/Licenses';
-import Tickets from '../components/Employees/EmployeeDetails/Tickets';
 import LoginPage from '../components/LoginPage';
 import SoftwarePage from '../pages/SoftwarePage';
+import LicensesPage from '../pages/LicensesPage';
+import TicketsPage from '../pages/TicketsPage';
 import AuditLogsPage from '../pages/AuditLogsPage';
 import IntegrationsPage from '../pages/IntegrationsPage';
 import SettingsPage from '../pages/SettingsPage';
 import AddEmployeePage from '../pages/AddEmployeePage';
+import BiometricsPage from '../pages/BiometricsPage';
+import ChatPage from '../pages/ChatPage';
+import IntegrationPage from '../pages/IntegrationPage';
+import ProfilePage from '../pages/ProfilePage';
 
 const AppRoutes = () => (
         <Router>
@@ -33,11 +37,14 @@ const AppRoutes = () => (
                     <Route path="/employees/add" element={<RequireRole roles={['admin']}><AddEmployeePage /></RequireRole>} />
                     <Route path="/assets" element={<AssetPage />} />
                     <Route path="/software" element={<SoftwarePage />} />
-                    <Route path="/licenses" element={<Licenses />} />
-                    <Route path="/tickets" element={<Tickets />} />
+                    <Route path="/licenses" element={<LicensesPage />} />
+                    <Route path="/tickets" element={<TicketsPage />} />
+                        <Route path="/chat" element={<ChatPage />} />
+                        <Route path="/integrations" element={<IntegrationPage />} />
+                    <Route path="/biometrics" element={<RequireRole roles={['admin', 'manager']}><BiometricsPage /></RequireRole>} />
                     <Route path="/audit-logs" element={<AuditLogsPage />} />
-                    <Route path="integrations" element={<RequireRole roles={['admin', 'manager']}><IntegrationsPage /></RequireRole>} />
                     <Route path="/settings" element={<RequireRole roles={['admin']}><SettingsPage /></RequireRole>} />
+                    <Route path="/profile" element={<ProfilePage />} />
                 </Route>
                 <Route element={<RequireAuth><DetailLayout /></RequireAuth>}>
                     <Route path="/employees/:id" element={<EmployeeDetailsPage />} >

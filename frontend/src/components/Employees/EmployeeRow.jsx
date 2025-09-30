@@ -11,43 +11,41 @@ const statusColors = {
 const EmployeeRow = ({ employee, onEdit, onDelete, onView, isSelected, onSelect }) => {
     const {
         id,
+        first_name,
+        last_name,
         name,
         email,
         department,
         role,
-        status,
-        avatar
+        status
     } = employee;
+
+    // Create full name from first_name and last_name, or use name if available
+    const fullName = name || `${first_name || ''} ${last_name || ''}`.trim() || 'Unknown';
 
     const formattedStatus = status
         ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
         : 'Unknown';
 
     return (
-        <tr className="hover:bg-gray-50 transition-colors">
-            <td className="px-4 py-3">
+        <tr className="hover:bg-gray-50 transition-colors h-12">
+            <td className="px-4 py-3 w-12">
                 <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onSelect(id)}
                     className="form-checkbox h-4 w-4 text-blue-600"
-                    aria-label={`Select ${name}`}
+                    aria-label={`Select ${fullName}`}
                 />
             </td>
-            <td className="px-4 py-3 flex items-center space-x-3">
-                <img
-                    src={avatar || '/default-avatar.png'}
-                    alt={name}
-                    className="w-8 h-8 rounded-full object-cover"
-                    onError={(e) => { e.target.src = '/default-avatar.png'; }}
-                />
-                <span className="font-medium text-gray-800 whitespace-nowrap">{name}</span>
+            <td className="px-4 py-3 w-1/4">
+                <span className="font-medium text-gray-800 whitespace-nowrap">{fullName}</span>
             </td>
-            <td className="px-4 py-3 text-gray-700 truncate">{email}</td>
-            <td className="px-4 py-3 text-gray-700">{department}</td>
-            <td className="px-4 py-3 text-gray-700">{role}</td>
+            <td className="px-4 py-3 w-1/4 text-gray-700 truncate">{email}</td>
+            <td className="px-4 py-3 w-1/6 text-gray-700">{department}</td>
+            <td className="px-4 py-3 w-1/6 text-gray-700">{role}</td>
 
-            <td className="px-4 py-3">
+            <td className="px-4 py-3 w-20">
                 <span
                     className={classNames(
                         'text-xs font-medium px-2 py-1 rounded-full',
@@ -57,10 +55,10 @@ const EmployeeRow = ({ employee, onEdit, onDelete, onView, isSelected, onSelect 
                 </span>
             </td>
 
-            <td className="px-4 py-3 space-x-3 text-gray-500 flex items-center">
+            <td className="px-4 py-3 w-24 space-x-3 text-gray-500 flex items-center">
                 <button
                     onClick={() => onView(employee)}
-                    aria-label={`View ${name}`}
+                    aria-label={`View ${fullName}`}
                     title="View"
                     className="hover:text-blue-600"
                 >
@@ -68,7 +66,7 @@ const EmployeeRow = ({ employee, onEdit, onDelete, onView, isSelected, onSelect 
                 </button>
                 <button
                     onClick={() => onEdit(employee)}
-                    aria-label={`Edit ${name}`}
+                    aria-label={`Edit ${fullName}`}
                     title="Edit"
                     className="hover:text-yellow-600"
                 >
@@ -76,7 +74,7 @@ const EmployeeRow = ({ employee, onEdit, onDelete, onView, isSelected, onSelect 
                 </button>
                 <button
                     onClick={() => onDelete(employee)}
-                    aria-label={`Delete ${name}`}
+                    aria-label={`Delete ${fullName}`}
                     title="Delete"
                     className="hover:text-red-600"
                 >

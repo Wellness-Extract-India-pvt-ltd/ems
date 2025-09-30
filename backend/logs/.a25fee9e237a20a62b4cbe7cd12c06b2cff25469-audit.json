@@ -1,0 +1,30 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\.a25fee9e237a20a62b4cbe7cd12c06b2cff25469-audit.json",
+    "files": [
+        {
+            "date": 1758257967373,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\performance-2025-09-19.log",
+            "hash": "41033667a4de9e0dbcf42f2faa5238eaf6e3b5b3ae7cfb6c609fbff3fc1128fe"
+        },
+        {
+            "date": 1758524597657,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\performance-2025-09-22.log",
+            "hash": "a13bd875fc3bacad0dea028b84b2fd6f1cf68a4958a45f3c72a32ff93cf65586"
+        },
+        {
+            "date": 1758606513784,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\performance-2025-09-23.log",
+            "hash": "c1910bdbfa8aa353d78c2e07e4bea5c4880ae439c0996e8eab80302a42601351"
+        },
+        {
+            "date": 1758619468899,
+            "name": "C:\\Users\\Wellness\\Projects\\ems\\ems\\backend\\logs\\performance-2025-09-23.log.1",
+            "hash": "d7b7ae0dba998b89e3f0a2af72246c1ed84467237dddd315122b7d7f5e9ed352"
+        }
+    ],
+    "hashType": "sha256"
+}

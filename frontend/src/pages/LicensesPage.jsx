@@ -15,8 +15,10 @@ const LicensesPage = () => {
   const [selectedLicense, setSelectedLicense] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchLicenses());
-  }, [dispatch]);
+    if (user) {
+      dispatch(fetchLicenses());
+    }
+  }, [dispatch, user]);
 
   const handleEdit = (license) => {
     setSelectedLicense(license);

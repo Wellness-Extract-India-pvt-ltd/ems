@@ -1,14 +1,8 @@
 // pages/SoftwarePage.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchSoftware } from '../store/slices/softwareSlice';
 import SoftwareTable from '../components/Software/SoftwareTable';
-<<<<<<< Updated upstream
-
-const SoftwarePage = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Software & Applications</h1>
-      <SoftwareTable />
-=======
 import SoftwareForm from '../components/Software/SoftwareForm';
 import RoleBasedAccess from '../components/RoleBasedAccess';
 import { useAuth } from '../auth/context/AuthProvider';
@@ -16,8 +10,16 @@ import { Plus } from 'lucide-react';
 
 const SoftwarePage = () => {
   const { user } = useAuth();
+  const dispatch = useDispatch();
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedSoftware, setSelectedSoftware] = useState(null);
+
+  // Fetch software data when component mounts and user is authenticated
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchSoftware());
+    }
+  }, [dispatch, user]);
 
   const handleEdit = (software) => {
     setSelectedSoftware(software);
@@ -83,7 +85,6 @@ const SoftwarePage = () => {
           />
         )}
       </RoleBasedAccess>
->>>>>>> Stashed changes
     </div>
   );
 };

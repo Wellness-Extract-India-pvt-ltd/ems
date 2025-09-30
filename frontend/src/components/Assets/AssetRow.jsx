@@ -1,69 +1,55 @@
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { Eye, Edit, Trash2 } from 'lucide-react';
+import { deleteHardware } from '../../store/slices/hardwareSlice';
 import AssetStatusBadge from './AssetStatusBadge';
 
-const AssetRow = ({ asset, onEdit, onDelete }) => {
+const AssetRow = ({ asset, onEdit, onView }) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    
     const { 
-<<<<<<< Updated upstream
-=======
         id,
->>>>>>> Stashed changes
-        type='Unknown', 
-        model='-', 
-<<<<<<< Updated upstream
-        status='Inactive',
-        assignedTo='-' 
+        name,
+        brand,
+        model,
+        category = 'Other',
+        serial_number = '-',
+        status = 'Available',
+        assigned_to = null,
+        assignedEmployee = null
     } = asset || {};
     
     const assetIcons = {
-        Laptop: '💻',
-        Desktop: '🖥️',
-        Phone: '📱',
-        Mobile: '📱',
-        Monitor: '🖵',
-        Printer: '🖨️'
-=======
-        serial_number='-',
-        status='inactive',
-        assignedEmployee=null 
-    } = asset || {};
-    
-    const assetIcons = {
-        laptop: '💻',
-        desktop: '🖥️',
-        server: '🖥️',
-        'network device': '🌐',
-        peripheral: '🖨️'
+        'Laptop': '💻',
+        'Desktop': '🖥️',
+        'Server': '🖥️',
+        'Network Device': '🌐',
+        'Mobile Device': '📱',
+        'Phone': '📱',
+        'Monitor': '🖵',
+        'Printer': '🖨️',
+        'Scanner': '📄',
+        'Keyboard': '⌨️',
+        'Mouse': '🖱️',
+        'Tablet': '📱',
+        'Other': '📦'
     };
 
     const handleDelete = () => {
         if (window.confirm('Are you sure you want to delete this hardware asset?')) {
             dispatch(deleteHardware(id));
         }
->>>>>>> Stashed changes
     };
 
     return (
         <tr className='border-b hover:bg-gray-50 transition text-sm'>
             <td className='px-4 py-2 font-medium text-gray-800 flex items-center gap-2'>
-                <span>{assetIcons[type] || '📦'}</span>
-                {type}
+                <span>{assetIcons[category] || '📦'}</span>
+                {category}
             </td>
-<<<<<<< Updated upstream
-            <td className='px-4 py-2 text-gray-600'>{model}</td>
-            <td className='px-4 py-2'>
-                <AssetStatusBadge status={status} />
-            </td>
-            <td className="px-4 py-2 text-gray-600">{assignedTo}</td>
-            <td className='px-4 py-2 flex gap-2'>
-                <button
-                    className='text-blue-600 hover:underline'
-                    onClick={() => onEdit?.(asset)}>Edit</button>
-                <button
-                    className='text-red-600 hover:underline'
-                    onClick={() => onDelete?.(asset)}>Delete</button>
-=======
-            <td className='px-4 py-2 text-gray-600'>{name}</td>
-            <td className='px-4 py-2 text-gray-600'>{brand} {model}</td>
-            <td className='px-4 py-2 text-gray-600'>{serial_number}</td>
+            <td className='px-4 py-2 text-gray-600'>{model || name}</td>
             <td className='px-4 py-2'>
                 <AssetStatusBadge status={status} />
             </td>
@@ -73,7 +59,7 @@ const AssetRow = ({ asset, onEdit, onDelete }) => {
             <td className='px-4 py-2'>
                 <div className="flex space-x-2">
                     <button
-                        onClick={() => navigate(`/assets/${id}`)}
+                        onClick={() => onView && onView(asset)}
                         className="p-1 text-blue-600 hover:text-blue-800"
                         title="View Details"
                     >
@@ -94,10 +80,9 @@ const AssetRow = ({ asset, onEdit, onDelete }) => {
                         <Trash2 size={16} />
                     </button>
                 </div>
->>>>>>> Stashed changes
             </td>
         </tr>
-    )
+    );
 };
 
 export default AssetRow;

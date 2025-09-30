@@ -1,0 +1,65 @@
+[2025-09-15 11:47:40] INFO: ✅ MySQL Database Connected successfully 
+[2025-09-15 11:47:40] INFO: ✅ Database models synchronized (skipped sync to preserve existing schema) 
+[2025-09-15 11:47:40] INFO: Redis connected successfully 
+[2025-09-15 11:47:40] INFO: BioMetrics Connection Config: {
+  "server": "172.16.1.171",
+  "database": "ONtime_Att",
+  "port": 1433,
+  "hasUser": true,
+  "hasPassword": true
+}
+[2025-09-15 11:47:40] INFO: ✅ BioMetrics SQL Server Connected {
+  "server": "172.16.1.171",
+  "database": "ONtime_Att"
+}
+[2025-09-15 11:47:40] INFO: BioMetrics Connection Test Successful: {
+  "version": "Microsoft SQL Server 2022 (RTM) - 16.0.1000.6 (X64) \n\tOct  8 2022 05:58:25 \n\tCopyright (C) 2022 Microsoft Corporation\n\tExpress Edition (64-bit) on Windows 10 Pro 10.0 <X64> (Build 19045: )\n",
+  "database_name": "ONtime_Att"
+}
+[2025-09-15 11:47:48] INFO: 🔌 BioMetrics SQL Server connection closed 
+[2025-09-15 11:47:48] INFO: 🔌 MySQL Database connection closed 
+[2025-09-15 11:47:48] INFO: Redis connection closed 
+[2025-09-15 11:54:10] INFO: ✅ MySQL Database Connected successfully 
+[2025-09-15 11:54:10] INFO: ✅ Database models synchronized (skipped sync to preserve existing schema) 
+[2025-09-15 11:54:10] INFO: Redis connected successfully 
+[2025-09-15 11:54:10] INFO: BioMetrics Connection Config: {
+  "server": "172.16.1.171",
+  "database": "ONtime_Att",
+  "port": 1433,
+  "hasUser": true,
+  "hasPassword": true
+}
+[2025-09-15 11:54:10] INFO: ✅ BioMetrics SQL Server Connected {
+  "server": "172.16.1.171",
+  "database": "ONtime_Att"
+}
+[2025-09-15 11:54:10] INFO: BioMetrics Connection Test Successful: {
+  "version": "Microsoft SQL Server 2022 (RTM) - 16.0.1000.6 (X64) \n\tOct  8 2022 05:58:25 \n\tCopyright (C) 2022 Microsoft Corporation\n\tExpress Edition (64-bit) on Windows 10 Pro 10.0 <X64> (Build 19045: )\n",
+  "database_name": "ONtime_Att"
+}
+[2025-09-15 11:54:28] INFO: 🔌 BioMetrics SQL Server connection closed 
+[2025-09-15 11:54:28] INFO: 🔌 MySQL Database connection closed 
+[2025-09-15 11:54:28] INFO: Redis connection closed 
+[2025-09-15 11:54:48] INFO: ✅ MySQL Database Connected successfully 
+[2025-09-15 11:54:48] INFO: ✅ Database models synchronized (skipped sync to preserve existing schema) 
+[2025-09-15 11:54:48] INFO: Redis connected successfully 
+[2025-09-15 11:54:48] INFO: BioMetrics Connection Config: {
+  "server": "172.16.1.171",
+  "database": "ONtime_Att",
+  "port": 1433,
+  "hasUser": true,
+  "hasPassword": true
+}
+[2025-09-15 11:54:49] INFO: ✅ BioMetrics SQL Server Connected {
+  "server": "172.16.1.171",
+  "database": "ONtime_Att"
+}
+[2025-09-15 11:54:49] INFO: BioMetrics Connection Test Successful: {
+  "version": "Microsoft SQL Server 2022 (RTM) - 16.0.1000.6 (X64) \n\tOct  8 2022 05:58:25 \n\tCopyright (C) 2022 Microsoft Corporation\n\tExpress Edition (64-bit) on Windows 10 Pro 10.0 <X64> (Build 19045: )\n",
+  "database_name": "ONtime_Att"
+}
+[2025-09-15 11:54:56] INFO: 🔌 BioMetrics SQL Server connection closed 
+[2025-09-15 11:54:56] INFO: 🔌 MySQL Database connection closed 
+[2025-09-15 11:54:56] INFO: Redis connection closed 
+[2025-09-15 11:55:49] INFO: ✅ MySQL Database Connected successfully 
+[2025-09-15 11:55:49] INFO: Redis connected successfully 

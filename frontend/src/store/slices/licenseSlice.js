@@ -9,7 +9,9 @@ export const fetchLicenses = createAsyncThunk(
       const { data } = await api.get('/licenses/all');
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      console.error('License fetch error:', err);
+      console.error('Error response:', err.response?.data);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch licenses');
     }
   }
 );
@@ -110,7 +112,7 @@ const licenseSlice = createSlice({
       })
       .addCase(fetchLicenses.fulfilled, (state, action) => {
         state.status.fetch = 'succeeded';
-        state.list = action.payload;
+        state.list = action.payload.data || action.payload || [];
       })
       .addCase(fetchLicenses.rejected, (state, action) => {
         state.status.fetch = 'failed';

@@ -3,20 +3,73 @@
   "type": "module",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+  "description": "EMS Backend API Server - Employee Management System with comprehensive features including authentication, database management, file handling, and biometric integration",
+  "author": "EMS Development Team",
+  "license": "MIT",
+  "keywords": [
+    "ems",
+    "backend",
+    "api",
+    "employee-management",
+    "nodejs",
+    "express",
+    "authentication",
+    "database",
+    "biometrics",
+    "azure-ad",
+    "mysql",
+    "redis"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wellnessextract/ems.git",
+    "directory": "backend"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "homepage": "https://github.com/wellnessextract/ems#readme",
+  "bugs": {
+    "url": "https://github.com/wellnessextract/ems/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "eslint . --ext .js,.json",
+    "lint:fix": "eslint . --ext .js,.json --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:seed:undo": "sequelize-cli db:seed:undo:all",
+    "db:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all",
+    "db:create": "sequelize-cli db:create",
+    "db:drop": "sequelize-cli db:drop",
+    "health": "node -e \"require('http').get('http://localhost:5000/api/v1/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })\"",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "outdated": "npm outdated",
+    "update": "npm update",
+    "clean": "rm -rf node_modules package-lock.json && npm install",
+    "build": "echo 'No build step required for Node.js application'",
+    "docker:build": "docker build -t ems-backend:latest .",
+    "docker:dev": "docker build -f Dockerfile.dev -t ems-backend:dev .",
+    "docker:run": "docker run -p 5000:5000 --env-file .env ems-backend:latest",
+    "docker:run:dev": "docker run -p 5000:5000 --env-file .env -v $(pwd):/app ems-backend:dev"
+  },
   "dependencies": {
     "@azure/msal-node": "^3.6.0",
     "@sendgrid/mail": "^8.1.5",
     "axios": "^1.9.0",
     "bullmq": "^5.56.0",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -25,12 +78,77 @@
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "ioredis": "^5.6.1",
-    "mongoose": "^8.15.1",
     "morgan": "^1.10.0",
+    "msnodesqlv8": "^5.1.1",
+    "mssql": "^11.0.1",
     "multer": "^2.0.1",
+    "mysql2": "^3.6.5",
     "nodemailer": "^7.0.4",
     "nodemon": "^3.1.10",
+    "openai": "^5.22.0",
+    "sequelize": "^6.35.2",
+    "uuid": "^13.0.0",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.6.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/logs/**",
+      "!**/uploads/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/?(*.)+(spec|test).js"
+    ],
+    "verbose": true
+  },
+  "eslintConfig": {
+    "extends": [
+      "standard"
+    ],
+    "env": {
+      "node": true,
+      "es2022": true,
+      "jest": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-console": "warn",
+      "no-unused-vars": "error",
+      "prefer-const": "error"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 80,
+    "tabWidth": 2
   }
 }

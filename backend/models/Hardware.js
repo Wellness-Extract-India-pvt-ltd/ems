@@ -1,83 +1,249 @@
-import mongoose from "mongoose";
+/**
+ * Hardware Model
+ * Represents hardware asset data in the EMS system
+ */
 
-const HARDWARE_TYPES = ["laptop", "desktop", "server", "network device", "peripheral"];
-const STATUSES = ["available", "in use", "maintenance", "retired"];
+import { DataTypes } from 'sequelize'
+import sequelize from '../database/connection.js'
 
-const assignmentHistorySchema = new mongoose.Schema({
-  employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
-  assignedDate: { type: Date, default: Date.now },
-  returnedDate: { type: Date }
-}, { _id: false });
-
-const hardwareSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
+const Hardware = sequelize.define(
+  'Hardware',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
-    type: {
-        type: String,
-        required: true,
-        enum: HARDWARE_TYPES,
-        trim: true
+    asset_tag: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+      validate: {
+        notEmpty: true,
+        len: [3, 50],
+        isAlphanumeric: true
+      }
+    },
+    name: {
+      type: DataTypes.STRING(200),
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+        len: [2, 200]
+      }
+    },
+    category: {
+      type: DataTypes.ENUM(
+        'Laptop',
+        'Desktop',
+        'Monitor',
+        'Keyboard',
+        'Mouse',
+        'Printer',
+        'Scanner',
+        'Network Device',
+        'Mobile Device',
+        'Tablet',
+        'Server',
+        'Other'
+      ),
+      allowNull: false,
+      validate: {
+        isIn: [
+          [
+            'Laptop',
+            'Desktop',
+            'Monitor',
+            'Keyboard',
+            'Mouse',
+            'Printer',
+            'Scanner',
+            'Network Device',
+            'Mobile Device',
+            'Tablet',
+            'Server',
+            'Other'
+          ]
+        ]
+      }
     },
     brand: {
-        type: String,
-        trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      validate: {
+        len: [0, 100]
+      }
     },
     model: {
-        type: String,
-        trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      validate: {
+        len: [0, 100]
+      }
     },
-    serialNumber: {
-      type: String,
+    serial_number: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
       unique: true,
-      sparse: true,
-      trim: true
+      validate: {
+        len: [0, 100]
+      }
     },
-    purchaseDate: {
-    type: Date,
-    required: true,
-    validate: {
-      validator: date => date <= new Date(),
-      message: "Purchase date cannot be in the future"
-    }
-  },
-    warrantyExpiryDate: {
-        type: Date,
-        validate: {
-        validator: function (value) {
-          return !value || value > this.purchaseDate;
-        },
-        message: "Warranty expiry date must be after purchase date",
-      },
+    purchase_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true,
+        isBefore: new Date().toISOString().split('T')[0]
+      }
+    },
+    purchase_price: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      validate: {
+        isDecimal: true,
+        min: 0
+      }
+    },
+    warranty_expiry: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true
+      }
     },
     status: {
-        type: String,
-        required: true,
-        enum: STATUSES,
-        default: 'available'
+      type: DataTypes.ENUM(
+        'Available',
+        'Assigned',
+        'Maintenance',
+        'Retired',
+        'Lost',
+        'Stolen'
+      ),
+      allowNull: false,
+      defaultValue: 'Available',
+      validate: {
+        isIn: [
+          ['Available', 'Assigned', 'Maintenance', 'Retired', 'Lost', 'Stolen']
+        ]
+      }
     },
-    assignedTo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Employee',
-        validate: {
-        validator: async function (value) {
-          if (!value) return true;
-          const employeeExists = await mongoose.model("Employee").exists({ _id: value });
-          return employeeExists != null;
-        },
-        message: "Assigned employee does not exist",
+    assigned_to: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'employees',
+        key: 'id'
       },
+      validate: {
+        isInt: true,
+        min: 1
+      }
     },
-    assignmentHistory: [assignmentHistorySchema]
-},
-{
-  timestamps: true
-});
+    assigned_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      validate: {
+        isDate: true,
+        isBefore: new Date().toISOString().split('T')[0]
+      }
+    },
+    location: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+      validate: {
+        len: [0, 200]
+      }
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      validate: {
+        len: [0, 2000]
+      }
+    },
+    specifications: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      validate: {
+        isValidJSON (value) {
+          if (value !== null && typeof value !== 'object') {
+            throw new Error('Specifications must be a valid JSON object')
+          }
+        }
+      }
+    }
+  },
+  {
+    tableName: 'hardware',
+    timestamps: true,
+    underscored: true,
+    indexes: [
+      {
+        fields: ['asset_tag']
+      },
+      {
+        fields: ['serial_number']
+      },
+      {
+        fields: ['status']
+      },
+      {
+        fields: ['assigned_to']
+      },
+      {
+        fields: ['category']
+      },
+      {
+        fields: ['brand']
+      },
+      {
+        fields: ['purchase_date']
+      },
+      {
+        fields: ['warranty_expiry']
+      },
+      {
+        fields: ['location']
+      }
+    ],
+    validate: {
+      purchasePriceMustBePositive () {
+        if (this.purchase_price !== null && this.purchase_price < 0) {
+          throw new Error('Purchase price must be positive')
+        }
+      },
+      warrantyExpiryAfterPurchase () {
+        if (
+          this.purchase_date &&
+          this.warranty_expiry &&
+          new Date(this.warranty_expiry) <= new Date(this.purchase_date)
+        ) {
+          throw new Error('Warranty expiry must be after purchase date')
+        }
+      },
+      assignedDateAfterPurchase () {
+        if (
+          this.purchase_date &&
+          this.assigned_date &&
+          new Date(this.assigned_date) < new Date(this.purchase_date)
+        ) {
+          throw new Error('Assigned date cannot be before purchase date')
+        }
+      },
+      assignedToRequiredWhenAssigned () {
+        if (this.status === 'Assigned' && !this.assigned_to) {
+          throw new Error('Assigned hardware must have an assigned employee')
+        }
+      },
+      assignedDateRequiredWhenAssigned () {
+        if (this.status === 'Assigned' && !this.assigned_date) {
+          throw new Error('Assigned hardware must have an assigned date')
+        }
+      }
+    }
+  }
+)
 
-hardwareSchema.index({ type: 1 });
-hardwareSchema.index({ status: 1 });
-hardwareSchema.index({ assignedTo: 1 });
-
-export default mongoose.model("Hardware", hardwareSchema);
+export default Hardware

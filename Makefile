@@ -1,17 +1,18 @@
 # EMS Docker Management Makefile
 
-.PHONY: help dev prod build clean logs shell restart
+.PHONY: help dev prod build clean logs shell restart test-biometrics
 
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  dev       - Start development environment"
-	@echo "  prod      - Start production environment"
-	@echo "  build     - Build backend Docker image"
-	@echo "  clean     - Stop and remove all containers and volumes"
-	@echo "  logs      - Show logs from all services"
-	@echo "  shell     - Open shell in backend container"
-	@echo "  restart   - Restart all services"
+	@echo "  dev            - Start development environment"
+	@echo "  prod           - Start production environment"
+	@echo "  build          - Build backend Docker image"
+	@echo "  clean          - Stop and remove all containers and volumes"
+	@echo "  logs           - Show logs from all services"
+	@echo "  shell          - Open shell in backend container"
+	@echo "  restart        - Restart all services"
+	@echo "  test-biometrics - Test BioMetrics Docker integration"
 
 # Development environment
 dev:
@@ -81,3 +82,15 @@ dev-rebuild:
 prod-rebuild:
 	@echo "Rebuilding and starting production environment..."
 	docker-compose -f docker-compose.prod.yml up -d --build
+
+# Test BioMetrics integration
+test-biometrics:
+	@echo "Testing BioMetrics Docker integration..."
+	@if [ -f "scripts/test-biometrics-docker.sh" ]; then \
+		chmod +x scripts/test-biometrics-docker.sh && \
+		./scripts/test-biometrics-docker.sh; \
+	else \
+		echo "BioMetrics test script not found. Please run manually:"; \
+		echo "  PowerShell: .\scripts\test-biometrics-docker.ps1"; \
+		echo "  Bash: ./scripts/test-biometrics-docker.sh"; \
+	fi
