@@ -1,83 +1,112 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
 const LICENSE_TYPES = ["commercial", "open-source", "freeware", "shareware"];
 const STATUSES = ["active", "inactive", "expired"];
 
-const licenseSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    type: {
-        type: String,
-        required: true,
-        enum: LICENSE_TYPES,
-        trim: true
-    },
-    vendor: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    licenseKey: {
-        type: String,
-        unique: true,
-        trim: true,
-        sparse: true,
-        select: false,
-    },
-    purchaseDate: {
-    type: Date,
-    required: true,
+const License = sequelize.define('License', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
     validate: {
-      validator: date => date <= new Date(),
-      message: "Purchase date cannot be in the future"
+      notEmpty: true,
+      len: [1, 100]
     }
   },
-    expiryDate: {
-        type: Date,
-        validate: {
-        validator: function (value) {
-          return !value || value > this.purchaseDate;
-        },
-        message: "Expiry date must be after purchase date",
-      },
-    },
-    status: {
-        type: String,
-        required: true,
-        enum: STATUSES,
-        default: 'active'
-    },
-    assignedTo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Employee',
-        validate: {
-        validator: async function (value) {
-          if (!value) return true;
-          const employee = await mongoose.model("Employee").exists({ _id: value });
-          return employee;
-        },
-        message: "Employee does not exist",
-      },
-    },
+  type: {
+    type: DataTypes.ENUM(...LICENSE_TYPES),
+    allowNull: false
   },
-  {
-    timestamps: true,
+  vendor: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 100]
+    }
+  },
+  license_key: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+    validate: {
+      len: [0, 200]
+    }
+  },
+  purchase_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+    validate: {
+      isDate: true,
+      isBefore: new Date().toISOString().split('T')[0]
+    }
+  },
+  expiry_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    validate: {
+      isDate: true
+    }
+  },
+  status: {
+    type: DataTypes.ENUM(...STATUSES),
+    allowNull: false,
+    defaultValue: 'active'
+  },
+  assigned_to: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
   }
-);
-
-licenseSchema.pre("save", function (next) {
-  if (this.expiryDate && this.expiryDate < new Date()) {
-    this.status = "expired";
+}, {
+  tableName: 'licenses',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      fields: ['type']
+    },
+    {
+      fields: ['status']
+    },
+    {
+      fields: ['vendor']
+    },
+    {
+      fields: ['assigned_to']
+    }
+  ],
+  validate: {
+    expiryAfterPurchase() {
+      if (this.expiry_date && this.purchase_date && 
+          this.expiry_date <= this.purchase_date) {
+        throw new Error('Expiry date must be after purchase date');
+      }
+    }
+  },
+  hooks: {
+    beforeSave: (license) => {
+      if (license.expiry_date && license.expiry_date < new Date()) {
+        license.status = "expired";
+      }
+    }
   }
-  next();
 });
 
-licenseSchema.index({ type: 1 });
-licenseSchema.index({ status: 1 });
-licenseSchema.index({ vendor: 1 });
-licenseSchema.index({ assignedTo: 1 });
+// Define associations
+License.associate = (models) => {
+  License.belongsTo(models.Employee, {
+    as: 'assignedEmployee',
+    foreignKey: 'assigned_to'
+  });
+};
 
-export default mongoose.model("License", licenseSchema);
+export default License;

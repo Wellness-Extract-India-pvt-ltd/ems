@@ -3,12 +3,12 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
-// Async thunks for hardware management
-export const fetchHardware = createAsyncThunk(
-  'hardware/fetchAll',
+// Async thunks for license management
+export const fetchLicenses = createAsyncThunk(
+  'licenses/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_BASE}/hardware/all`);
+      const { data } = await axios.get(`${API_BASE}/licenses/all`);
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -16,35 +16,35 @@ export const fetchHardware = createAsyncThunk(
   }
 );
 
-export const createHardware = createAsyncThunk(
-  'hardware/create',
-  async (hardwareData, { rejectWithValue }) => {
+export const createLicense = createAsyncThunk(
+  'licenses/create',
+  async (licenseData, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API_BASE}/hardware/add`, hardwareData);
-      return data.hardware;
+      const { data } = await axios.post(`${API_BASE}/licenses/add`, licenseData);
+      return data.license;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
 
-export const updateHardware = createAsyncThunk(
-  'hardware/update',
-  async ({ id, hardwareData }, { rejectWithValue }) => {
+export const updateLicense = createAsyncThunk(
+  'licenses/update',
+  async ({ id, licenseData }, { rejectWithValue }) => {
     try {
-      const { data } = await axios.put(`${API_BASE}/hardware/update/${id}`, hardwareData);
-      return data.hardware;
+      const { data } = await axios.put(`${API_BASE}/licenses/update/${id}`, licenseData);
+      return data.license;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
 
-export const deleteHardware = createAsyncThunk(
-  'hardware/delete',
+export const deleteLicense = createAsyncThunk(
+  'licenses/delete',
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_BASE}/hardware/delete/${id}`);
+      await axios.delete(`${API_BASE}/licenses/delete/${id}`);
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -52,12 +52,12 @@ export const deleteHardware = createAsyncThunk(
   }
 );
 
-export const getHardwareById = createAsyncThunk(
-  'hardware/getById',
+export const getLicenseById = createAsyncThunk(
+  'licenses/getById',
   async (id, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_BASE}/hardware/${id}`);
-      return data.hardware;
+      const { data } = await axios.get(`${API_BASE}/licenses/${id}`);
+      return data.license;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
@@ -83,11 +83,11 @@ const initialState = {
   }
 };
 
-const assetSlice = createSlice({
-  name: 'assets',
+const licenseSlice = createSlice({
+  name: 'licenses',
   initialState,
   reducers: {
-    selectHardware: (state, action) => {
+    selectLicense: (state, action) => {
       state.selected = action.payload;
     },
     clearError: (state, action) => {
@@ -105,84 +105,84 @@ const assetSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all hardware
-      .addCase(fetchHardware.pending, (state) => {
+      // Fetch all licenses
+      .addCase(fetchLicenses.pending, (state) => {
         state.status.fetch = 'loading';
         state.error.fetch = null;
       })
-      .addCase(fetchHardware.fulfilled, (state, action) => {
+      .addCase(fetchLicenses.fulfilled, (state, action) => {
         state.status.fetch = 'succeeded';
         state.list = action.payload;
       })
-      .addCase(fetchHardware.rejected, (state, action) => {
+      .addCase(fetchLicenses.rejected, (state, action) => {
         state.status.fetch = 'failed';
         state.error.fetch = action.payload;
       })
 
-      // Create hardware
-      .addCase(createHardware.pending, (state) => {
+      // Create license
+      .addCase(createLicense.pending, (state) => {
         state.status.create = 'loading';
         state.error.create = null;
       })
-      .addCase(createHardware.fulfilled, (state, action) => {
+      .addCase(createLicense.fulfilled, (state, action) => {
         state.status.create = 'succeeded';
         state.list.push(action.payload);
       })
-      .addCase(createHardware.rejected, (state, action) => {
+      .addCase(createLicense.rejected, (state, action) => {
         state.status.create = 'failed';
         state.error.create = action.payload;
       })
 
-      // Update hardware
-      .addCase(updateHardware.pending, (state) => {
+      // Update license
+      .addCase(updateLicense.pending, (state) => {
         state.status.update = 'loading';
         state.error.update = null;
       })
-      .addCase(updateHardware.fulfilled, (state, action) => {
+      .addCase(updateLicense.fulfilled, (state, action) => {
         state.status.update = 'succeeded';
-        const idx = state.list.findIndex(hw => hw._id === action.payload._id);
+        const idx = state.list.findIndex(lic => lic._id === action.payload._id);
         if (idx !== -1) state.list[idx] = action.payload;
         if (state.selected && state.selected._id === action.payload._id) {
           state.selected = action.payload;
         }
       })
-      .addCase(updateHardware.rejected, (state, action) => {
+      .addCase(updateLicense.rejected, (state, action) => {
         state.status.update = 'failed';
         state.error.update = action.payload;
       })
 
-      // Delete hardware
-      .addCase(deleteHardware.pending, (state) => {
+      // Delete license
+      .addCase(deleteLicense.pending, (state) => {
         state.status.delete = 'loading';
         state.error.delete = null;
       })
-      .addCase(deleteHardware.fulfilled, (state, action) => {
+      .addCase(deleteLicense.fulfilled, (state, action) => {
         state.status.delete = 'succeeded';
-        state.list = state.list.filter(hw => hw._id !== action.payload);
+        state.list = state.list.filter(lic => lic._id !== action.payload);
         if (state.selected && state.selected._id === action.payload) {
           state.selected = null;
         }
       })
-      .addCase(deleteHardware.rejected, (state, action) => {
+      .addCase(deleteLicense.rejected, (state, action) => {
         state.status.delete = 'failed';
         state.error.delete = action.payload;
       })
 
-      // Get hardware by ID
-      .addCase(getHardwareById.pending, (state) => {
+      // Get license by ID
+      .addCase(getLicenseById.pending, (state) => {
         state.status.fetchById = 'loading';
         state.error.fetchById = null;
       })
-      .addCase(getHardwareById.fulfilled, (state, action) => {
+      .addCase(getLicenseById.fulfilled, (state, action) => {
         state.status.fetchById = 'succeeded';
         state.selected = action.payload;
       })
-      .addCase(getHardwareById.rejected, (state, action) => {
+      .addCase(getLicenseById.rejected, (state, action) => {
         state.status.fetchById = 'failed';
         state.error.fetchById = action.payload;
       });
   }
 });
 
-export const { selectHardware, clearError, resetStatus } = assetSlice.actions;
-export default assetSlice.reducer;
+export const { selectLicense, clearError, resetStatus } = licenseSlice.actions;
+export default licenseSlice.reducer;

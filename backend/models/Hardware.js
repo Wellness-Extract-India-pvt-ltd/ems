@@ -1,83 +1,113 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
 const HARDWARE_TYPES = ["laptop", "desktop", "server", "network device", "peripheral"];
 const STATUSES = ["available", "in use", "maintenance", "retired"];
 
-const assignmentHistorySchema = new mongoose.Schema({
-  employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
-  assignedDate: { type: Date, default: Date.now },
-  returnedDate: { type: Date }
-}, { _id: false });
-
-const hardwareSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    type: {
-        type: String,
-        required: true,
-        enum: HARDWARE_TYPES,
-        trim: true
-    },
-    brand: {
-        type: String,
-        trim: true,
-    },
-    model: {
-        type: String,
-        trim: true,
-    },
-    serialNumber: {
-      type: String,
-      unique: true,
-      sparse: true,
-      trim: true
-    },
-    purchaseDate: {
-    type: Date,
-    required: true,
+const Hardware = sequelize.define('Hardware', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
     validate: {
-      validator: date => date <= new Date(),
-      message: "Purchase date cannot be in the future"
+      notEmpty: true,
+      len: [1, 100]
     }
   },
-    warrantyExpiryDate: {
-        type: Date,
-        validate: {
-        validator: function (value) {
-          return !value || value > this.purchaseDate;
-        },
-        message: "Warranty expiry date must be after purchase date",
-      },
+  type: {
+    type: DataTypes.ENUM(...HARDWARE_TYPES),
+    allowNull: false
+  },
+  brand: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 50]
+    }
+  },
+  model: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 50]
+    }
+  },
+  serial_number: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+    validate: {
+      len: [0, 100]
+    }
+  },
+  purchase_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+    validate: {
+      isDate: true,
+      isBefore: new Date().toISOString().split('T')[0]
+    }
+  },
+  warranty_expiry_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    validate: {
+      isDate: true
+    }
+  },
+  status: {
+    type: DataTypes.ENUM(...STATUSES),
+    allowNull: false,
+    defaultValue: 'available'
+  },
+  assigned_to: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
+  }
+}, {
+  tableName: 'hardware',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      fields: ['type']
     },
-    status: {
-        type: String,
-        required: true,
-        enum: STATUSES,
-        default: 'available'
+    {
+      fields: ['status']
     },
-    assignedTo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Employee',
-        validate: {
-        validator: async function (value) {
-          if (!value) return true;
-          const employeeExists = await mongoose.model("Employee").exists({ _id: value });
-          return employeeExists != null;
-        },
-        message: "Assigned employee does not exist",
-      },
-    },
-    assignmentHistory: [assignmentHistorySchema]
-},
-{
-  timestamps: true
+    {
+      fields: ['assigned_to']
+    }
+  ],
+  validate: {
+    warrantyAfterPurchase() {
+      if (this.warranty_expiry_date && this.purchase_date && 
+          this.warranty_expiry_date <= this.purchase_date) {
+        throw new Error('Warranty expiry date must be after purchase date');
+      }
+    }
+  }
 });
 
-hardwareSchema.index({ type: 1 });
-hardwareSchema.index({ status: 1 });
-hardwareSchema.index({ assignedTo: 1 });
+// Define associations
+Hardware.associate = (models) => {
+  Hardware.belongsTo(models.Employee, {
+    as: 'assignedEmployee',
+    foreignKey: 'assigned_to'
+  });
 
-export default mongoose.model("Hardware", hardwareSchema);
+  Hardware.hasMany(models.HardwareAssignmentHistory, {
+    as: 'assignmentHistory',
+    foreignKey: 'hardware_id'
+  });
+};
+
+export default Hardware;

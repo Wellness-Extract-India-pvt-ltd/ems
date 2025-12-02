@@ -1,67 +1,95 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
 const STATUSES = ["enabled", "disabled", "disconnected"];
 
-const integrationSchema = new mongoose.Schema({
+const Integration = sequelize.define('Integration', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   name: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 100]
+    }
   },
   provider: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 100]
+    }
   },
   description: {
-    type: String,
-    trim: true
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   config: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: {}
   },
   status: {
-    type: String,
-    enum: STATUSES,
-    default: "enabled",
-    required: true
+    type: DataTypes.ENUM(...STATUSES),
+    allowNull: false,
+    defaultValue: "enabled"
   },
-  connectedAt: {
-    type: Date
+  connected_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   },
-  lastSyncedAt: {
-    type: Date
+  last_synced_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   },
-  managedBy: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee"
-    }
-  ],
-  allowedRoles: [
-    {
-      type: String,
-      enum: ["admin", "manager", "employee"],
-      required: true
-    }
-  ],
-  oauth: {
-    refreshToken: { type: String, select: false },
-    accessToken: { type: String, select: false },
-    expiry: { type: Date }
+  allowed_roles: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: []
   },
-  isDeleted: {
-    type: Boolean,
-    default: false
+  oauth_refresh_token: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  oauth_access_token: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  oauth_expiry: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  is_deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
-},
-{
-  timestamps: true
+}, {
+  tableName: 'integrations',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      fields: ['provider']
+    },
+    {
+      fields: ['status']
+    }
+  ]
 });
 
-integrationSchema.index({ provider: 1 });
-integrationSchema.index({ status: 1 });
-integrationSchema.index({ allowedRoles: 1 });
+// Define associations
+Integration.associate = (models) => {
+  Integration.belongsToMany(models.Employee, {
+    through: 'IntegrationManagers',
+    as: 'managedBy',
+    foreignKey: 'integration_id',
+    otherKey: 'employee_id'
+  });
+};
 
-export default mongoose.model("Integration", integrationSchema);
+export default Integration;

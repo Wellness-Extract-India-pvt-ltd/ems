@@ -4,11 +4,11 @@
  */
 
 import { validationResult } from 'express-validator';
-import mongoose from 'mongoose';
+import { Op } from 'sequelize';
 import crypto from 'crypto';
 import axios from 'axios';
 
-import Employee from '../models/Employee.js';
+import { Employee, EmployeeEducation, EmployeeOrganization, sequelize } from '../models/index.js';
 import getAccessToken from '../utils/msgraph.js';
 import logger from '../utils/logger.js';
 
@@ -17,17 +17,15 @@ function mapFilesToDoc(files, payload) {
 
   return {
     ...payload,
-    avatarPath: lookup.avatar || payload.avatarPath,
-    bank: payload.bank
-      ? { ...payload.bank, passbookUrl: lookup.passbook || payload.bank.passbookUrl }
-      : undefined,
+    avatar_path: lookup.avatar || payload.avatar_path,
+    passbook_path: lookup.passbook || payload.passbook_path,
     educations: (payload.educations || []).map((edu, i) => ({
       ...edu,
-      certificatePath: lookup[`education_${i}`] || edu.certificatePath,
+      certificate_path: lookup[`education_${i}`] || edu.certificate_path,
     })),
     organisations: (payload.organisations || []).map((org, i) => ({
       ...org,
-      experienceLetterPath: lookup[`organisation_${i}`] || org.experienceLetterPath,
+      experience_letter_path: lookup[`organisation_${i}`] || org.experience_letter_path,
     })),
   };
 }
@@ -38,11 +36,9 @@ export async function addEmployee(req, res) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const session = await mongoose.startSession();
+  const transaction = await sequelize.transaction();
 
   try {
-    session.startTransaction();
-
     const payload = JSON.parse(req.body.payload || '{}');
 
     // Generate a temporary password for MS Azure user
@@ -86,12 +82,78 @@ export async function addEmployee(req, res) {
     // Map uploaded files to payload fields
     const docWithFiles = mapFilesToDoc(req.files, payload);
 
-    // Create employee record with msGraphUserId
-    const [employee] = await Employee.create([{ ...docWithFiles, msGraphUserId }], { session });
+    // Flatten the nested structure for MySQL
+    const employeeData = {
+      first_name: payload.personal?.firstName,
+      middle_name: payload.personal?.middleName,
+      last_name: payload.personal?.lastName,
+      date_of_birth: payload.personal?.dob,
+      gender: payload.personal?.gender,
+      marital_status: payload.personal?.maritalStatus,
+      photo_path: payload.personal?.photoPath,
+      resume_path: payload.personal?.resumePath,
+      id_proof_path: payload.personal?.idProofPath,
+      avatar_path: docWithFiles.avatar_path,
+      
+      email: payload.contact?.email,
+      phone: payload.contact?.phone,
+      emergency_contact: payload.contact?.emergencyContact,
+      address: payload.contact?.address,
+      
+      employee_id: payload.employment?.employeeId,
+      join_date: payload.employment?.joinDate,
+      employment_type: payload.employment?.employmentType,
+      department_id: payload.employment?.department,
+      position: payload.employment?.position,
+      status: payload.employment?.status || 'Active',
+      manager_id: payload.employment?.manager,
+      work_location: payload.employment?.workLocation,
+      work_schedule: payload.employment?.workSchedule,
+      
+      bank_name: payload.bank?.bankName,
+      account_number: payload.bank?.accountNumber,
+      ifsc_code: payload.bank?.ifsc,
+      passbook_path: docWithFiles.passbook_path,
+      
+      ms_graph_user_id: msGraphUserId,
+      contact_email: payload.contact?.email
+    };
 
-    await session.commitTransaction();
+    // Create employee record
+    const employee = await Employee.create(employeeData, { transaction });
 
-    logger.info('Employee created successfully', { employeeId: employee._id });
+    // Create education records if any
+    if (docWithFiles.educations && docWithFiles.educations.length > 0) {
+      const educationData = docWithFiles.educations.map(edu => ({
+        employee_id: employee.id,
+        qualification: edu.qualification,
+        field: edu.field,
+        institution: edu.institution,
+        year_of_completion: edu.yearOfCompletion,
+        grade: edu.grade,
+        certificate_path: edu.certificate_path
+      }));
+      await EmployeeEducation.bulkCreate(educationData, { transaction });
+    }
+
+    // Create organization records if any
+    if (docWithFiles.organisations && docWithFiles.organisations.length > 0) {
+      const organizationData = docWithFiles.organisations.map(org => ({
+        employee_id: employee.id,
+        company_name: org.companyName,
+        position: org.position,
+        experience_years: org.experienceYears,
+        start_date: org.startDate,
+        end_date: org.endDate,
+        responsibilities: org.responsibilities,
+        experience_letter_path: org.experience_letter_path
+      }));
+      await EmployeeOrganization.bulkCreate(organizationData, { transaction });
+    }
+
+    await transaction.commit();
+
+    logger.info('Employee created successfully', { employeeId: employee.id });
 
     return res.status(201).json({
       message: 'Employee created',
@@ -99,7 +161,7 @@ export async function addEmployee(req, res) {
       temporaryPassword: tempPassword // you might want to send this securely, e.g., email or separate flow
     });
   } catch (err) {
-    await session.abortTransaction();
+    await transaction.rollback();
     logger.error('Employee creation failed', {
       error: err.message,
       stack: err.stack
@@ -108,8 +170,6 @@ export async function addEmployee(req, res) {
       message: 'Failed to create employee',
       error: err.message
     });
-  } finally {
-    session.endSession();
   }
 }
 
@@ -121,25 +181,36 @@ export async function listEmployees(req, res) {
   const { search = '', page = 1, limit = 10 } = req.query;
 
   try {
-    const query = search ? {
-      $or: [
-        { 'personal.firstName': new RegExp(search, 'i') },
-        { 'personal.lastName': new RegExp(search, 'i') },
-        { 'contact.email': new RegExp(search, 'i') },
+    const whereClause = search ? {
+      [Op.or]: [
+        { first_name: { [Op.like]: `%${search}%` } },
+        { last_name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
       ]
     } : {};
 
-    const employees = await Employee.find(query)
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .lean();
-
-    const count = await Employee.countDocuments(query);
+    const { count, rows: employees } = await Employee.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: (parseInt(page) - 1) * parseInt(limit),
+      include: [
+        {
+          model: EmployeeEducation,
+          as: 'educations',
+          required: false
+        },
+        {
+          model: EmployeeOrganization,
+          as: 'organizations',
+          required: false
+        }
+      ]
+    });
 
     res.status(200).json({
       employees,
       totalPages: Math.ceil(count / limit),
-      currentPage: page
+      currentPage: parseInt(page)
     });
   } catch (error) {
     logger.error('Employee list error', error);
@@ -156,7 +227,21 @@ export async function listEmployees(req, res) {
  */
 export async function getEmployeeById(req, res) {
   try {
-    const employee = await Employee.findById(req.params._id).lean();
+    const employee = await Employee.findByPk(req.params._id, {
+      include: [
+        {
+          model: EmployeeEducation,
+          as: 'educations',
+          required: false
+        },
+        {
+          model: EmployeeOrganization,
+          as: 'organizations',
+          required: false
+        }
+      ]
+    });
+    
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
@@ -182,15 +267,32 @@ export async function updateEmployee(req, res) {
   const { msGraphUserId, refreshToken, ...updateFields } = req.body;
 
   try {
-    const updatedEmployee = await Employee.findByIdAndUpdate(
-      req.params._id,
+    const [updatedRowsCount] = await Employee.update(
       updateFields,
-      { new: true, runValidators: true }
+      { 
+        where: { id: req.params._id },
+        returning: true
+      }
     );
 
-    if (!updatedEmployee) {
+    if (updatedRowsCount === 0) {
       return res.status(404).json({ message: 'Employee not found' });
     }
+
+    const updatedEmployee = await Employee.findByPk(req.params._id, {
+      include: [
+        {
+          model: EmployeeEducation,
+          as: 'educations',
+          required: false
+        },
+        {
+          model: EmployeeOrganization,
+          as: 'organizations',
+          required: false
+        }
+      ]
+    });
 
     logger.info('Employee updated', { employeeId: req.params._id });
     res.status(200).json({
@@ -215,10 +317,14 @@ export async function updateEmployee(req, res) {
  */
 export async function deleteEmployee(req, res) {
   try {
-    const deletedEmployee = await Employee.findByIdAndDelete(req.params._id);
-    if (!deletedEmployee) {
+    const deletedRowsCount = await Employee.destroy({
+      where: { id: req.params._id }
+    });
+    
+    if (deletedRowsCount === 0) {
       return res.status(404).json({ message: 'Employee not found' });
     }
+    
     logger.info('Employee deleted', { employeeId: req.params._id });
     res.status(200).json({ message: 'Employee deleted successfully' });
   } catch (error) {

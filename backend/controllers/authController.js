@@ -1,13 +1,8 @@
-/**
- * Authentication Controller
- * Handles user registration, login, logout, token refresh, and related auth actions.
- */
-
 import jwt from 'jsonwebtoken';
+import { Op } from 'sequelize';
 import msalClient from '../utils/msalConfig.js';
 import { getUserProfile } from '../utils/graphService.js';
-import UserRoleMap from '../models/UserRoleMap.js';
-import Employee from '../models/Employee.js';
+import { UserRoleMap, Employee } from '../models/index.js';
 import logger from '../utils/logger.js';
 import config from '../config.js';
 import { validationResult } from 'express-validator';
@@ -21,8 +16,10 @@ async function resolveEmail(identifier) {
   if (candidate.includes('@')) {
     return candidate.toLowerCase();
   }
-  const employee = await Employee.findOne({ employeeCode: candidate.toUpperCase() });
-  return employee?.contactEmail.toLowerCase() || null;
+  const employee = await Employee.findOne({ 
+    where: { employee_id: candidate.toUpperCase() } 
+  });
+  return employee?.email.toLowerCase() || null;
 }
 
 /**
@@ -34,8 +31,7 @@ async function resolveEmail(identifier) {
 export const register = async (req, res, next) => {
   try {
     // Create a new user with the provided request body
-    const user = new Employee(req.body);
-    await user.save();
+    const user = await Employee.create(req.body);
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (err) {
     // Pass error to global error handler
@@ -106,23 +102,29 @@ export async function redirectHandler(req, res) {
     const email = (profile.mail || profile.userPrincipalName || '').toLowerCase();
 
     const user = await UserRoleMap.findOne({ 
-      $or: [
-        { msGraphUserId }, 
-        { email }
-      ], 
-      isActive: true 
-    }).populate('employee');
+      where: {
+        [Op.or]: [
+          { ms_graph_user_id: msGraphUserId }, 
+          { email: email }
+        ],
+        is_active: true 
+      },
+      include: [{
+        model: Employee,
+        as: 'employee'
+      }]
+    });
 
     if (!user) {
       return res.redirect(`${frontendUrl}/login?error=not_found`);
     }
 
     const jwtPayload = {
-      id: user._id,
-      msGraphUserId: user.msGraphUserId,
+      id: user.id,
+      msGraphUserId: user.ms_graph_user_id,
       email: user.email,
       role: user.role,
-      employee: user.employee ? user.employee._id : null
+      employee: user.employee ? user.employee.id : null
     };
 
     console.log("JWT ", jwtPayload);
@@ -139,14 +141,17 @@ export async function redirectHandler(req, res) {
     console.log("Token ", jwtToken);
 
     const refreshToken = jwt.sign(
-      { id: user._id },
+      { id: user.id },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: '7d' }
     );
 
     console.log("Refresh Token", refreshToken);
     
-    await UserRoleMap.findByIdAndUpdate(user._id, { refreshToken });
+    await UserRoleMap.update(
+      { refresh_token: refreshToken },
+      { where: { id: user.id } }
+    );
     console.log("Have fun");
     return res.redirect(`${frontendUrl}/auth/redirect?token=${jwtToken}&refreshToken=${refreshToken}`);
   } catch (error) {

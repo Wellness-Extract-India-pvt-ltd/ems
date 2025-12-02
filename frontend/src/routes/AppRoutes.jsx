@@ -16,6 +16,12 @@ import Licenses from '../components/Employees/EmployeeDetails/Licenses';
 import Tickets from '../components/Employees/EmployeeDetails/Tickets';
 import LoginPage from '../components/LoginPage';
 import SoftwarePage from '../pages/SoftwarePage';
+import SoftwareDetailPage from '../pages/SoftwareDetailPage';
+import TicketsPage from '../pages/TicketsPage';
+import TicketDetailPage from '../pages/TicketDetailPage';
+import LicensesPage from '../pages/LicensesPage';
+import LicenseDetailPage from '../pages/LicenseDetailPage';
+import AssetDetailPage from '../pages/AssetDetailPage';
 import AuditLogsPage from '../pages/AuditLogsPage';
 import IntegrationsPage from '../pages/IntegrationsPage';
 import SettingsPage from '../pages/SettingsPage';
@@ -32,9 +38,13 @@ const AppRoutes = () => (
                     <Route path="/employees" element={<RequireRole roles={['admin', 'manager']}><EmployeePage /></RequireRole>} />
                     <Route path="/employees/add" element={<RequireRole roles={['admin']}><AddEmployeePage /></RequireRole>} />
                     <Route path="/assets" element={<AssetPage />} />
+                    <Route path="/assets/:id" element={<AssetDetailPage />} />
                     <Route path="/software" element={<SoftwarePage />} />
-                    <Route path="/licenses" element={<Licenses />} />
-                    <Route path="/tickets" element={<Tickets />} />
+                    <Route path="/software/:id" element={<SoftwareDetailPage />} />
+                    <Route path="/licenses" element={<LicensesPage />} />
+                    <Route path="/licenses/:id" element={<LicenseDetailPage />} />
+                    <Route path="/tickets" element={<TicketsPage />} />
+                    <Route path="/tickets/:id" element={<TicketDetailPage />} />
                     <Route path="/audit-logs" element={<AuditLogsPage />} />
                     <Route path="integrations" element={<RequireRole roles={['admin', 'manager']}><IntegrationsPage /></RequireRole>} />
                     <Route path="/settings" element={<RequireRole roles={['admin']}><SettingsPage /></RequireRole>} />

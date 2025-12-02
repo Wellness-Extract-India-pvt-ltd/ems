@@ -1,11 +1,66 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
-const userRoleMapSchema = new mongoose.Schema({
-  msGraphUserId: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true, lowercase: true },
-  role: { type: String, enum: ['admin', 'manager', 'employee'], required: true },
-  employee: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
-  isActive: { type: Boolean, default: true }
-}, { timestamps: true });
+const UserRoleMap = sequelize.define('UserRoleMap', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  ms_graph_user_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
+      notEmpty: true
+    }
+  },
+  role: {
+    type: DataTypes.ENUM('admin', 'manager', 'employee'),
+    allowNull: false
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  refresh_token: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+}, {
+  tableName: 'user_role_maps',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      fields: ['role']
+    },
+    {
+      fields: ['employee_id']
+    }
+  ]
+});
 
-export default mongoose.model('UserRoleMap', userRoleMapSchema);
+// Define associations
+UserRoleMap.associate = (models) => {
+  UserRoleMap.belongsTo(models.Employee, {
+    as: 'employee',
+    foreignKey: 'employee_id'
+  });
+};
+
+export default UserRoleMap;

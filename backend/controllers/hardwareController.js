@@ -3,10 +3,10 @@
  * Handles CRUD operations and business logic for hardware asset resources.
  */
 
-import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
+import { Op } from 'sequelize';
 import logger from '../utils/logger.js';
-import Hardware from '../models/Hardware.js';
+import { Hardware, Employee } from '../models/index.js';
 
 /**
  * Get all hardware assets.
@@ -17,7 +17,13 @@ import Hardware from '../models/Hardware.js';
 export async function listHardware(req, res, next) {
   try {
     // Retrieve all hardware assets from the database
-    const hardware = await Hardware.find();
+    const hardware = await Hardware.findAll({
+      include: [{
+        model: Employee,
+        as: 'assignedEmployee',
+        attributes: ['id', 'first_name', 'last_name']
+      }]
+    });
     res.json(hardware);
   } catch (err) {
     next(err);
@@ -33,7 +39,13 @@ export async function listHardware(req, res, next) {
 export async function getHardwareById(req, res, next) {
   try {
     // Find hardware asset by ID
-    const hardware = await Hardware.findById(req.params.id);
+    const hardware = await Hardware.findByPk(req.params.id, {
+      include: [{
+        model: Employee,
+        as: 'assignedEmployee',
+        attributes: ['id', 'first_name', 'last_name']
+      }]
+    });
     if (!hardware) {
       return res.status(404).json({ error: 'Hardware not found' });
     }
@@ -56,8 +68,7 @@ export async function addHardware(req, res, next) {
   }
   try {
     // Create and save a new hardware asset
-    const hardware = new Hardware(req.body);
-    await hardware.save();
+    const hardware = await Hardware.create(req.body);
     res.status(201).json(hardware);
   } catch (err) {
     next(err);
@@ -73,7 +84,11 @@ export async function addHardware(req, res, next) {
 export async function updateHardware(req, res, next) {
   try {
     // Find hardware asset by ID and update
-    const hardware = await Hardware.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const [updatedRowsCount] = await Hardware.update(req.body, { where: { id: req.params.id } });
+    if (updatedRowsCount === 0) {
+      return res.status(404).json({ error: 'Hardware not found' });
+    }
+    const hardware = await Hardware.findByPk(req.params.id);
     if (!hardware) {
       return res.status(404).json({ error: 'Hardware not found' });
     }
@@ -92,8 +107,8 @@ export async function updateHardware(req, res, next) {
 export async function deleteHardware(req, res, next) {
   try {
     // Find hardware asset by ID and delete
-    const hardware = await Hardware.findByIdAndDelete(req.params.id);
-    if (!hardware) {
+    const deletedRowsCount = await Hardware.destroy({ where: { id: req.params.id } });
+    if (deletedRowsCount === 0) {
       return res.status(404).json({ error: 'Hardware not found' });
     }
     res.json({ message: 'Hardware deleted successfully' });

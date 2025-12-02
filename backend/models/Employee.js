@@ -1,121 +1,271 @@
-import mongoose from 'mongoose';
-const { Schema, Types } = mongoose;
+import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
 
 const GENDERS = ["Male", "Female", "Other"];
 const MARITAL_STATUSES = ["Single", "Married", "Divorced", "Widowed"];
 const EMPLOYMENT_TYPES = ["Full-time", "Intern", "Contractor"];
 const STATUSES = ["Active", "Inactive", "Onboarding", "Suspended", "Terminated"];
 
-// EDUCATION
-const educationSchema = new Schema({
-  qualification:     { type: String, required: true },
-  field:             { type: String, required: true },
-  institution:       { type: String, required: true },
-  yearOfCompletion:  {
-    type: Number,
-    required: true,
-    min: 1950,
-    max: new Date().getFullYear()
+const Employee = sequelize.define('Employee', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
-  grade:             { type: String },
-  certificatePath:   { type: String },
-}, { _id: false });
+  
+  // Personal Information
+  first_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 50]
+    }
+  },
+  middle_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 50]
+    }
+  },
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 50]
+    }
+  },
+  date_of_birth: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+    validate: {
+      isDate: true,
+      isBefore: new Date().toISOString().split('T')[0]
+    }
+  },
+  gender: {
+    type: DataTypes.ENUM(...GENDERS),
+    allowNull: false
+  },
+  marital_status: {
+    type: DataTypes.ENUM(...MARITAL_STATUSES),
+    allowNull: true
+  },
+  photo_path: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  resume_path: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  id_proof_path: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  avatar_path: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
 
-// ORGANISATION
-const organisationSchema = new Schema({
-  companyName:           { type: String },
-  position:              { type: String },
-  experienceYears:       { type: Number },
-  startDate:             { type: Date },
-  endDate:               { type: Date },
-  responsibilities:      { type: String },
-  experienceLetterPath:  { type: String },
-}, { _id: false });
-
-// BANK
-const bankSchema = new Schema({
-  bankName:      { type: String, required: true },
-  accountNumber: { type: String, required: true, trim: true },
-  ifsc:          { type: String, required: true, uppercase: true, trim: true },
-  passbookPath:  { type: String, required: true }
-}, { _id: false });
-
-// PERSONAL
-const personalSchema = new Schema({
-  firstName:     { type: String, required: true },
-  middleName:    { type: String },
-  lastName:      { type: String, required: true },
-  dob: {
-      type: Date,
-      required: true,
-      validate: {
-        validator: (dob) => dob <= new Date(),
-        message: "DOB cannot be in the future",
-      },
-    },
-  gender:        { type: String, enum: GENDERS, required: true },
-  maritalStatus: { type: String, enum: MARITAL_STATUSES },
-  photoPath:     { type: String },
-  resumePath:    { type: String },
-  idProofPath:   { type: String }
-}, { _id: false });
-
-// CONTACT
-const contactSchema = new Schema({
+  // Contact Information
   email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    },
-  phone: {
-      type: String,
-      required: true,
-      match: /^[0-9]{10,15}$/,
-      set: v => v.trim()
-    },
-  emergencyContact: {
-    type: String,
-    match: /^[0-9]{10,15}$/,
-    set: v => v.trim()
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
+      notEmpty: true
+    }
   },
-  address: { type: String }
-}, { _id: false });
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      is: /^[0-9]{10,15}$/,
+      notEmpty: true
+    }
+  },
+  emergency_contact: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      is: /^[0-9]{10,15}$/
+    }
+  },
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
 
-// EMPLOYMENT
-const employmentSchema = new Schema({
-  employeeId:     { type: String, required: true, unique: true, trim: true },
-  joinDate:       { type: Date, required: true },
-  employmentType: {
-      type: String,
-      enum: EMPLOYMENT_TYPES,
-      required: true,
+  // Employment Information
+  employee_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      notEmpty: true,
+      len: [1, 20]
+    }
+  },
+  join_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+    validate: {
+      isDate: true
+    }
+  },
+  employment_type: {
+    type: DataTypes.ENUM(...EMPLOYMENT_TYPES),
+    allowNull: false
+  },
+  department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'departments',
+      key: 'id'
+    }
+  },
+  position: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 100]
+    }
+  },
+  status: {
+    type: DataTypes.ENUM(...STATUSES),
+    defaultValue: "Active"
+  },
+  manager_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employees',
+      key: 'id'
+    }
+  },
+  work_location: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 100]
+    }
+  },
+  work_schedule: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 100]
+    }
+  },
+
+  // Bank Information
+  bank_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 100]
+    }
+  },
+  account_number: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 20]
+    }
+  },
+  ifsc_code: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 11]
+    }
+  },
+  passbook_path: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+
+  // Microsoft Graph Integration
+  ms_graph_user_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
+
+  // Legacy field for compatibility
+  contact_email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
+      notEmpty: true
+    }
+  }
+}, {
+  tableName: 'employees',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      fields: ['department_id']
     },
-  department:     { type: Types.ObjectId, ref: 'Department', required: true },
-  position:       { type: String, required: true },
-  status:         { type: String, enum: STATUSES, default: "Active" },
-  manager:        { type: Types.ObjectId, ref: 'Employee'},
-  workLocation:   { type: String },
-  workSchedule:   { type: String }
-}, { _id: false });
-
-// EMPLOYEE
-const employeeSchema = new Schema({
-  avatarPath: { type: String },
-  personal:     personalSchema,
-  contact:      contactSchema,
-  educations:   [educationSchema],
-  organisations:[organisationSchema],
-  bank:         bankSchema,
-  employment:   employmentSchema,
-  msGraphUserId: { type: String, index: true },
-  
-  contactEmail: { type: String, required: true, lowercase: true, unique: true },
-  
-}, { timestamps: true });
-
-employeeSchema.virtual('fullName').get(function () {
-  return `${this.personal.firstName} ${this.personal.middleName || ''} ${this.personal.lastName}`.trim();
+    {
+      fields: ['manager_id']
+    },
+    {
+      fields: ['status']
+    }
+  ]
 });
 
-export default mongoose.model('Employee', employeeSchema);
+// Define associations
+Employee.associate = (models) => {
+  // Self-referencing association for manager
+  Employee.belongsTo(models.Employee, {
+    as: 'manager',
+    foreignKey: 'manager_id'
+  });
+
+  Employee.hasMany(models.Employee, {
+    as: 'subordinates',
+    foreignKey: 'manager_id'
+  });
+
+  // Association with Department
+  Employee.belongsTo(models.Department, {
+    as: 'department',
+    foreignKey: 'department_id'
+  });
+
+  // Association with Education
+  Employee.hasMany(models.EmployeeEducation, {
+    as: 'educations',
+    foreignKey: 'employee_id'
+  });
+
+  // Association with Organization (Work Experience)
+  Employee.hasMany(models.EmployeeOrganization, {
+    as: 'organizations',
+    foreignKey: 'employee_id'
+  });
+
+  // Association with Tickets
+  Employee.hasMany(models.Ticket, {
+    as: 'createdTickets',
+    foreignKey: 'created_by'
+  });
+
+  Employee.hasMany(models.Ticket, {
+    as: 'assignedTickets',
+    foreignKey: 'assigned_to'
+  });
+};
+
+export default Employee;

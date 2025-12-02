@@ -7,6 +7,16 @@ const config = {
 
   env: process.env.NODE_ENV || 'development',
 
+  // Database configuration
+  database: {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3306,
+    name: process.env.DB_NAME || 'ems_db',
+    username: process.env.DB_USER || 'ems_user',
+    password: process.env.DB_PASSWORD || 'ems_password'
+  },
+
+  // Legacy MongoDB URI (for migration reference)
   mongoUri: process.env.MONGO_URI,
 
   jwt: {
